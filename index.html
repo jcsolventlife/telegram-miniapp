@@ -99,12 +99,17 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .feature-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(138, 124, 255, 0.2);
             border-color: rgba(138, 124, 255, 0.3);
+        }
+        
+        .feature-card:active {
+            transform: translateY(0);
         }
         
         .feature-card::before {
@@ -115,6 +120,22 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .feature-card::after {
+            content: '→';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #8A7CFF;
+            font-size: 18px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover::after {
+            opacity: 1;
+            transform: translateX(5px);
         }
         
         .feature-icon {
@@ -250,6 +271,96 @@
             vertical-align: middle;
         }
         
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .trial-page {
+            padding: 20px;
+        }
+        
+        .trial-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #1D2E5E;
+            border-radius: 16px;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+        }
+        
+        .trial-header h2 {
+            color: #E8EAF1;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .trial-header p {
+            color: #9AA2B4;
+            font-size: 16px;
+        }
+        
+        .trial-option {
+            background: #1D2E5E;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .trial-option:hover {
+            border-color: #8A7CFF;
+            box-shadow: 0 8px 30px rgba(138, 124, 255, 0.2);
+        }
+        
+        .trial-option h3 {
+            color: #E8EAF1;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .trial-conditions {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .trial-conditions li {
+            color: #9AA2B4;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .trial-conditions li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #8A7CFF;
+            font-weight: bold;
+        }
+        
+        .back-button {
+            background: transparent;
+            color: #8A7CFF;
+            border: 1px solid #8A7CFF;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #8A7CFF;
+            color: white;
+        }
+        
         .fade-in {
             animation: fadeIn 0.6s ease-out;
         }
@@ -268,67 +379,100 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">📈</div>
-            <h1>Trading Signals</h1>
-            <p>Everything you need, right in Telegram</p>
+        <!-- Main Page -->
+        <div id="mainPage" class="page active">
+            <div class="header">
+                <div class="logo">📈</div>
+                <h1>Trading Signals</h1>
+                <p>Everything you need, right in Telegram</p>
+            </div>
+            
+            <div class="content">
+                <div class="telegram-user-info" id="userInfo">
+                    <div>
+                        <span class="user-avatar" id="userAvatar">U</span>
+                        <span>Welcome, <strong id="userName">User</strong>!</span>
+                    </div>
+                </div>
+                
+                <div class="stats fade-in">
+                    <div class="stat">
+                        <div class="stat-number">500BN</div>
+                        <div class="stat-label">Data Pts Analysed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">92%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Support</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card fade-in" onclick="showFeatureDetails('speed')">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Experience blazing fast performance with our optimized infrastructure and cutting-edge technology stack.</p>
+                </div>
+                
+                <div class="feature-card fade-in" onclick="showFeatureDetails('security')">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Private</h3>
+                    <p>Your data is protected with enterprise-grade security measures and end-to-end encryption.</p>
+                </div>
+                
+                <div class="feature-card fade-in" onclick="showFeatureDetails('telegram')">
+                    <div class="feature-icon">📱</div>
+                    <h3>Native Telegram Integration</h3>
+                    <p>Everything works directly in Telegram. No external apps needed - just tap and interact!</p>
+                </div>
+                
+                <div class="feature-card fade-in" onclick="showFeatureDetails('communication')">
+                    <div class="feature-icon">💬</div>
+                    <h3>Instant Communication</h3>
+                    <p>Get responses immediately in this chat. No email delays or phone calls required.</p>
+                </div>
+            </div>
+            
+            <div class="cta-section">
+                <button class="cta-button" onclick="showTrialPage()">
+                    Get Started Now
+                </button>
+                <button class="secondary-button" onclick="handleShareApp()">
+                    Share This App
+                </button>
+            </div>
         </div>
         
-        <div class="content">
-            <div class="telegram-user-info" id="userInfo">
-                <div>
-                    <span class="user-avatar" id="userAvatar">U</span>
-                    <span>Welcome, <strong id="userName">User</strong>!</span>
+        <!-- Trial Page -->
+        <div id="trialPage" class="page">
+            <div class="trial-page">
+                <button class="back-button" onclick="showMainPage()">← Back</button>
+                
+                <div class="trial-header">
+                    <h2>Choose Your Plan</h2>
+                    <p>Start your trading journey today</p>
+                </div>
+                
+                <div class="trial-option" onclick="startTrial()">
+                    <h3>🚀 7-Day Free Trial</h3>
+                    <ul class="trial-conditions">
+                        <li>1-2 premium signals per day</li>
+                        <li>Trial starts from your first signal</li>
+                        <li>Full access to signal analysis</li>
+                        <li>24/7 Telegram support</li>
+                        <li>No credit card required</li>
+                        <li>Cancel anytime</li>
+                    </ul>
+                </div>
+                
+                <div class="cta-section">
+                    <button class="cta-button" onclick="startTrial()">
+                        Start Free Trial
+                    </button>
                 </div>
             </div>
-            
-            <div class="stats fade-in">
-                <div class="stat">
-                    <div class="stat-number">500BN</div>
-                    <div class="stat-label">Data Pts Analysed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">92%</div>
-                    <div class="stat-label">Accuracy</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">Support</div>
-                </div>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">⚡</div>
-                <h3>Lightning Fast</h3>
-                <p>Experience blazing fast performance with our optimized infrastructure and cutting-edge technology stack.</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">🔒</div>
-                <h3>Secure & Private</h3>
-                <p>Your data is protected with enterprise-grade security measures and end-to-end encryption.</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">📱</div>
-                <h3>Native Telegram Integration</h3>
-                <p>Everything works directly in Telegram. No external apps needed - just tap and interact!</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">💬</div>
-                <h3>Instant Communication</h3>
-                <p>Get responses immediately in this chat. No email delays or phone calls required.</p>
-            </div>
-        </div>
-        
-        <div class="cta-section">
-            <button class="cta-button" onclick="handleGetStarted()">
-                Get Started Now
-            </button>
-            <button class="secondary-button" onclick="handleShareApp()">
-                Share This App
-            </button>
         </div>
     </div>
 
@@ -362,49 +506,94 @@
         }
         
         function handleGetStarted() {
-            if (tg) {
-                // This sends data back to your Telegram bot
-                tg.sendData(JSON.stringify({
-                    action: 'get_started',
-                    user_id: tg.initDataUnsafe?.user?.id,
-                    timestamp: Date.now()
-                }));
-                tg.showAlert('Thanks for your interest! We\'ll contact you soon via Telegram.');
-            } else {
-                alert('Get Started clicked! In Telegram, this would send your info to the bot.');
+            showTrialPage();
+        }
+        
+        function showFeatureDetails(feature) {
+            const featureDetails = {
+                speed: {
+                    title: '⚡ Lightning Fast Performance',
+                    message: 'Our advanced algorithms process market data in real-time:\n\n• Sub-second signal generation\n• Cloud-based infrastructure\n• 99.9% uptime guarantee\n• Instant notifications to Telegram\n• No delays, no missed opportunities'
+                },
+                security: {
+                    title: '🔒 Bank-Level Security',
+                    message: 'Your data and privacy are our top priority:\n\n• End-to-end encryption\n• No personal trading data stored\n• Secure API connections\n• GDPR compliant\n• Zero data sharing with third parties'
+                },
+                telegram: {
+                    title: '📱 Native Telegram Integration',
+                    message: 'Everything works seamlessly within Telegram:\n\n• No external apps needed\n• Instant signal delivery\n• Interactive buttons and commands\n• Works on all devices\n• Integrated with your chat experience'
+                },
+                communication: {
+                    title: '💬 Instant Communication',
+                    message: 'Get immediate support and responses:\n\n• Real-time signal updates\n• Direct chat with support team\n• Instant notifications\n• No email delays\n• Community discussions available'
+                }
+            };
+            
+            const details = featureDetails[feature];
+            if (tg && details) {
+                tg.showPopup({
+                    title: details.title,
+                    message: details.message,
+                    buttons: [
+                        {id: 'close', type: 'close', text: 'Got it!'}
+                    ]
+                });
+            } else if (details) {
+                alert(details.title + '\n\n' + details.message);
             }
         }
         
-        function handleLearnMore() {
+        function showTrialPage() {
+            document.getElementById('mainPage').classList.remove('active');
+            document.getElementById('trialPage').classList.add('active');
+            
             if (tg) {
-                // Show more info within Telegram instead of external link
+                tg.BackButton.show();
+                tg.BackButton.onClick(showMainPage);
+            }
+        }
+        
+        function showMainPage() {
+            document.getElementById('trialPage').classList.remove('active');
+            document.getElementById('mainPage').classList.add('active');
+            
+            if (tg) {
+                tg.BackButton.hide();
+            }
+        }
+        
+        function startTrial() {
+            if (tg) {
                 tg.showPopup({
-                    title: 'More Information',
-                    message: 'Would you like us to send you detailed information via this chat?',
+                    title: '🚀 Start Your Free Trial',
+                    message: 'Ready to begin your 7-day free trial?\n\nYou\'ll receive 1-2 premium signals per day starting immediately. No credit card required.',
                     buttons: [
-                        {id: 'yes', type: 'default', text: 'Yes, send info'},
-                        {id: 'no', type: 'cancel', text: 'Not now'}
+                        {id: 'start', type: 'default', text: 'Yes, Start Trial!'},
+                        {id: 'cancel', type: 'cancel', text: 'Not now'}
                     ]
                 }, (buttonId) => {
-                    if (buttonId === 'yes') {
+                    if (buttonId === 'start') {
                         tg.sendData(JSON.stringify({
-                            action: 'request_info',
+                            action: 'start_trial',
                             user_id: tg.initDataUnsafe?.user?.id,
+                            plan: '7_day_trial',
                             timestamp: Date.now()
                         }));
-                        tg.showAlert('Perfect! We\'ll send you detailed info in this chat.');
+                        tg.showAlert('🎉 Welcome to your free trial! You\'ll receive your first signal within 24 hours.');
+                        showMainPage();
                     }
                 });
             } else {
-                alert('Learn More clicked! This would show options within Telegram.');
+                alert('Trial started! In Telegram, this would send your registration to the bot.');
             }
         }
+        
         
         function handleShareApp() {
             if (tg) {
                 // Use Telegram's native sharing
                 const botUsername = 'your_bot_username'; // Replace with your actual bot username
-                const shareText = `Check out this awesome business app! 🚀`;
+                const shareText = `Check out these amazing trading signals! 📈🚀`;
                 const shareUrl = `https://t.me/${botUsername}?start=shared`;
                 
                 tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
@@ -431,7 +620,7 @@
         // Handle back button
         if (tg) {
             tg.BackButton.onClick(() => {
-                tg.close();
+                showMainPage();
             });
         }
     </script>
