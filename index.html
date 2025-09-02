@@ -51,25 +51,9 @@
             animation: pulse 4s ease-in-out infinite;
         }
         
-        .header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.1), transparent);
-            animation: sweep 3s ease-in-out infinite;
-        }
-        
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.5; }
             50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        @keyframes sweep {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
         
         .logo {
@@ -99,7 +83,6 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
-            animation: fadeInUp 0.8s ease-out;
         }
         
         .header p {
@@ -107,41 +90,94 @@
             opacity: 0.9;
             position: relative;
             z-index: 1;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .content {
             padding: 30px 20px;
         }
         
+        .telegram-user-info {
+            background: rgba(138, 124, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid rgba(138, 124, 255, 0.3);
+        }
+        
+        .telegram-user-info.show {
+            display: block;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8A7CFF, #6C7690);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 12px;
+            vertical-align: middle;
+            box-shadow: 0 0 20px rgba(138, 124, 255, 0.4);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 25px;
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(15px);
+            margin: 20px 0;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(138, 124, 255, 0.1), transparent);
+            animation: rotate 8s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .stat {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #8A7CFF;
+            text-shadow: 0 0 20px rgba(138, 124, 255, 0.5);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #9AA2B4;
+            margin-top: 5px;
+        }
+        
         .feature-row {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
-            opacity: 0;
-            animation: slideInLeft 0.6s ease-out 0.4s both;
-        }
-        
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
         
         .feature-card-half {
@@ -151,7 +187,7 @@
             padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(138, 124, 255, 0.2);
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
             cursor: pointer;
@@ -162,31 +198,16 @@
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.1), transparent);
-            transition: left 0.6s;
-        }
-        
-        .feature-card-half:hover::before {
-            left: 100%;
-        }
-        
-        .feature-card-half:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(138, 124, 255, 0.3);
-            border-color: rgba(138, 124, 255, 0.5);
-        }
-        
-        .feature-card-half::after {
-            content: '';
-            position: absolute;
-            top: 0;
             left: 0;
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .feature-card-half:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(138, 124, 255, 0.3);
+            border-color: rgba(138, 124, 255, 0.5);
         }
         
         .feature-card-half .feature-icon {
@@ -201,11 +222,6 @@
             font-size: 16px;
             margin-bottom: 12px;
             box-shadow: 0 4px 15px rgba(138, 124, 255, 0.3);
-            transition: transform 0.3s ease;
-        }
-        
-        .feature-card-half:hover .feature-icon {
-            transform: rotate(10deg) scale(1.1);
         }
         
         .feature-card-half h3 {
@@ -231,6 +247,19 @@
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .instruments-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+            border-radius: 2px;
         }
         
         .instruments-grid {
@@ -241,20 +270,16 @@
         }
         
         .instrument-card {
-            background: #1D2E5E;
+            background: rgba(29, 46, 94, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 20px;
             text-align: center;
-            border: 1px solid rgba(138, 124, 255, 0.1);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.4s ease;
             cursor: pointer;
             position: relative;
-        }
-        
-        .instrument-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(138, 124, 255, 0.2);
-            border-color: rgba(138, 124, 255, 0.3);
+            overflow: hidden;
         }
         
         .instrument-card::before {
@@ -265,6 +290,12 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .instrument-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(138, 124, 255, 0.3);
+            border-color: rgba(138, 124, 255, 0.5);
         }
         
         .instrument-name {
@@ -278,104 +309,30 @@
             color: #8A7CFF;
             font-size: 14px;
             font-weight: 500;
-        }
-        
-        .instrument-page {
-            padding: 20px;
-        }
-        
-        .instrument-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 25px;
-            background: #1D2E5E;
-            border-radius: 16px;
-            border: 1px solid rgba(138, 124, 255, 0.2);
-        }
-        
-        .instrument-header h2 {
-            color: #E8EAF1;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        
-        .instrument-header .return-highlight {
-            color: #8A7CFF;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .strategy-section, .returns-section {
-            background: #1D2E5E;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(138, 124, 255, 0.1);
-        }
-        
-        .section-title {
-            color: #E8EAF1;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .strategy-text {
-            color: #9AA2B4;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-        
-        .returns-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .account-return {
-            background: rgba(138, 124, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(138, 124, 255, 0.2);
-        }
-        
-        .account-size {
-            color: #E8EAF1;
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        
-        .account-profit {
-            color: #8A7CFF;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .account-percentage {
-            color: #9AA2B4;
-            font-size: 14px;
+            text-shadow: 0 0 10px rgba(138, 124, 255, 0.5);
         }
         
         .cta-section {
             padding: 30px 20px;
             text-align: center;
-            background: #0A0A12;
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(10px);
             border-top: 1px solid rgba(138, 124, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
         
         .cta-button {
             background: linear-gradient(135deg, #8A7CFF 0%, #6C7690 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
+            padding: 18px 36px;
             border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(138, 124, 255, 0.4);
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(138, 124, 255, 0.4);
             position: relative;
             overflow: hidden;
             width: 100%;
@@ -383,109 +340,59 @@
         }
         
         .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(138, 124, 255, 0.5);
-        }
-        
-        .cta-button:active {
-            transform: translateY(0);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(138, 124, 255, 0.6);
         }
         
         .secondary-button {
             background: transparent;
             color: #8A7CFF;
             border: 2px solid #8A7CFF;
-            padding: 14px 32px;
+            padding: 16px 36px;
             border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             width: 100%;
+            position: relative;
+            overflow: hidden;
         }
         
         .secondary-button:hover {
-            background: #8A7CFF;
-            color: white;
-            box-shadow: 0 4px 15px rgba(138, 124, 255, 0.3);
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px;
-            background: #1D2E5E;
-            margin: 20px 0;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(138, 124, 255, 0.1);
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #8A7CFF;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #9AA2B4;
-            margin-top: 5px;
-        }
-        
-        .telegram-user-info {
             background: rgba(138, 124, 255, 0.1);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none;
-            border: 1px solid rgba(138, 124, 255, 0.2);
-        }
-        
-        .telegram-user-info.show {
-            display: block;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #8A7CFF;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            margin-right: 12px;
-            vertical-align: middle;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(138, 124, 255, 0.3);
         }
         
         .page {
             display: none;
+            opacity: 0;
+            transition: all 0.3s ease;
         }
         
         .page.active {
             display: block;
+            opacity: 1;
         }
         
-        .trial-page {
+        .trial-page, .instrument-page {
             padding: 20px;
         }
         
-        .trial-header {
+        .trial-header, .instrument-header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
-            background: #1D2E5E;
-            border-radius: 16px;
-            border: 1px solid rgba(138, 124, 255, 0.2);
+            padding: 25px;
+            background: rgba(29, 46, 94, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(138, 124, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
         
-        .trial-header h2 {
+        .trial-header h2, .instrument-header h2 {
             color: #E8EAF1;
             margin-bottom: 10px;
             font-size: 24px;
@@ -496,19 +403,30 @@
             font-size: 16px;
         }
         
-        .trial-option {
-            background: #1D2E5E;
+        .return-highlight {
+            color: #8A7CFF;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 0 15px rgba(138, 124, 255, 0.5);
+        }
+        
+        .trial-option, .strategy-section, .returns-section {
+            background: rgba(29, 46, 94, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 25px;
             margin-bottom: 20px;
             border: 2px solid rgba(138, 124, 255, 0.2);
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
         
         .trial-option:hover {
             border-color: #8A7CFF;
-            box-shadow: 0 8px 30px rgba(138, 124, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(138, 124, 255, 0.3);
+            transform: translateY(-5px);
         }
         
         .trial-option h3 {
@@ -537,11 +455,66 @@
             font-weight: bold;
         }
         
-        .back-button {
-            background: transparent;
+        .section-title {
+            color: #E8EAF1;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .strategy-text {
+            color: #9AA2B4;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .returns-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .account-return {
+            background: rgba(138, 124, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .account-return:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(138, 124, 255, 0.2);
+            border-color: rgba(138, 124, 255, 0.4);
+        }
+        
+        .account-size {
+            color: #E8EAF1;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .account-profit {
             color: #8A7CFF;
-            border: 1px solid #8A7CFF;
-            padding: 10px 20px;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(138, 124, 255, 0.5);
+        }
+        
+        .account-percentage {
+            color: #9AA2B4;
+            font-size: 14px;
+        }
+        
+        .back-button {
+            background: rgba(138, 124, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #8A7CFF;
+            border: 1px solid rgba(138, 124, 255, 0.3);
+            padding: 12px 24px;
             border-radius: 25px;
             font-size: 14px;
             cursor: pointer;
@@ -550,23 +523,9 @@
         }
         
         .back-button:hover {
-            background: #8A7CFF;
+            background: rgba(138, 124, 255, 0.2);
             color: white;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            transform: translateX(-5px);
         }
     </style>
 </head>
@@ -588,7 +547,7 @@
                     </div>
                 </div>
                 
-                <div class="stats fade-in">
+                <div class="stats">
                     <div class="stat">
                         <div class="stat-number">500BN</div>
                         <div class="stat-label">Data Pts Analysed</div>
@@ -603,7 +562,7 @@
                     </div>
                 </div>
                 
-                <div class="feature-row fade-in">
+                <div class="feature-row">
                     <div class="feature-card-half" onclick="showFeatureDetails('speed')">
                         <div class="feature-icon">⚡</div>
                         <h3>Lightning Fast</h3>
@@ -870,55 +829,7 @@
             // Configure main button
             tg.MainButton.text = "Get Started";
             tg.MainButton.show();
-            tg.MainButton.onClick(handleGetStarted);
-        }
-        
-        // Animated counter function
-        function animateCounter(element, target, suffix = '', duration = 2000) {
-            let start = 0;
-            let startTime = null;
-            
-            function animate(currentTime) {
-                if (!startTime) startTime = currentTime;
-                const progress = (currentTime - startTime) / duration;
-                
-                if (progress < 1) {
-                    const current = Math.floor(start + (target - start) * easeOutQuart(progress));
-                    element.textContent = current + suffix;
-                    requestAnimationFrame(animate);
-                } else {
-                    element.textContent = target + suffix;
-                }
-            }
-            
-            requestAnimationFrame(animate);
-        }
-        
-        function easeOutQuart(t) {
-            return 1 - (--t) * t * t * t;
-        }
-        
-        // Initialize counters when page loads
-        function initializeCounters() {
-            setTimeout(() => {
-                const statNumbers = document.querySelectorAll('.stat-number');
-                statNumbers.forEach((stat, index) => {
-                    const text = stat.textContent;
-                    if (text.includes('500BN')) {
-                        stat.textContent = '0BN';
-                        animateCounter(stat, 500, 'BN', 2000);
-                    } else if (text.includes('92%')) {
-                        stat.textContent = '0%';
-                        animateCounter(stat, 92, '%', 2000);
-                    } else if (text.includes('24/7')) {
-                        // Keep as is for 24/7
-                    }
-                });
-            }, 600);
-        }
-        
-        function handleGetStarted() {
-            showTrialPage();
+            tg.MainButton.onClick(() => showTrialPage());
         }
         
         function showFeatureDetails(feature) {
@@ -948,208 +859,32 @@
         }
         
         function showInstrumentPage(instrument) {
-            const mainPage = document.getElementById('mainPage');
-            const targetPage = document.getElementById(instrument + 'Page');
+            document.getElementById('mainPage').classList.remove('active');
+            document.getElementById(instrument + 'Page').classList.add('active');
             
-            // Add slide out animation to main page
-            mainPage.classList.add('slide-out-left');
-            
-            setTimeout(() => {
-                mainPage.classList.remove('active', 'slide-out-left');
-                targetPage.classList.add('active');
-                
-                // Animate profit numbers on instrument page
-                setTimeout(() => animateInstrumentCounters(instrument), 300);
-                
-                if (tg) {
-                    tg.BackButton.show();
-                    tg.BackButton.onClick(() => showMainPage());
-                }
-            }, 250);
-        }
-        
-        function animateInstrumentCounters(instrument) {
-            const profitElements = document.querySelectorAll(`#${instrument}Page .account-profit`);
-            
-            profitElements.forEach(element => {
-                const text = element.textContent;
-                const match = text.match(/\+\$([0-9,]+)/);
-                if (match) {
-                    const target = parseInt(match[1].replace(',', ''));
-                    element.textContent = '+$0';
-                    
-                    let current = 0;
-                    const increment = target / 50;
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= target) {
-                            element.textContent = '+
-        
-        function startTrial() {
             if (tg) {
-                tg.showPopup({
-                    title: '🚀 Start Your Free Trial',
-                    message: 'Ready to begin your 7-day free trial?\n\nYou\'ll receive 1-2 premium signals per day starting immediately. No credit card required.',
-                    buttons: [
-                        {id: 'start', type: 'default', text: 'Yes, Start Trial!'},
-                        {id: 'cancel', type: 'cancel', text: 'Not now'}
-                    ]
-                }, (buttonId) => {
-                    if (buttonId === 'start') {
-                        tg.sendData(JSON.stringify({
-                            action: 'start_trial',
-                            user_id: tg.initDataUnsafe?.user?.id,
-                            plan: '7_day_trial',
-                            timestamp: Date.now()
-                        }));
-                        tg.showAlert('🎉 Welcome to your free trial! You\'ll receive your first signal within 24 hours.');
-                        showMainPage();
-                    }
-                });
-            } else {
-                alert('Trial started! In Telegram, this would send your registration to the bot.');
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => showMainPage());
             }
-        }
-        
-        
-        function handleShareApp() {
-            if (tg) {
-                // Use Telegram's native sharing
-                const botUsername = 'your_bot_username'; // Replace with your actual bot username
-                const shareText = `Check out these amazing trading signals! 📈🚀`;
-                const shareUrl = `https://t.me/${botUsername}?start=shared`;
-                
-                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
-            } else {
-                alert('Share feature! This would let users share your Mini App with others.');
-            }
-        }
-        
-        // Add fade-in animation on scroll
-        function addFadeInAnimation() {
-            const cards = document.querySelectorAll('.feature-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s forwards`;
-                }, 100);
-            });
-        }
-        
-        // Initialize animations
-        document.addEventListener('DOMContentLoaded', addFadeInAnimation);
-        
-        // Handle back button
-        if (tg) {
-            tg.BackButton.onClick(() => {
-                showMainPage();
-            });
-        }
-    </script>
-</body>
-</html> + target.toLocaleString();
-                            clearInterval(timer);
-                        } else {
-                            element.textContent = '+
-        
-        function startTrial() {
-            if (tg) {
-                tg.showPopup({
-                    title: '🚀 Start Your Free Trial',
-                    message: 'Ready to begin your 7-day free trial?\n\nYou\'ll receive 1-2 premium signals per day starting immediately. No credit card required.',
-                    buttons: [
-                        {id: 'start', type: 'default', text: 'Yes, Start Trial!'},
-                        {id: 'cancel', type: 'cancel', text: 'Not now'}
-                    ]
-                }, (buttonId) => {
-                    if (buttonId === 'start') {
-                        tg.sendData(JSON.stringify({
-                            action: 'start_trial',
-                            user_id: tg.initDataUnsafe?.user?.id,
-                            plan: '7_day_trial',
-                            timestamp: Date.now()
-                        }));
-                        tg.showAlert('🎉 Welcome to your free trial! You\'ll receive your first signal within 24 hours.');
-                        showMainPage();
-                    }
-                });
-            } else {
-                alert('Trial started! In Telegram, this would send your registration to the bot.');
-            }
-        }
-        
-        
-        function handleShareApp() {
-            if (tg) {
-                // Use Telegram's native sharing
-                const botUsername = 'your_bot_username'; // Replace with your actual bot username
-                const shareText = `Check out these amazing trading signals! 📈🚀`;
-                const shareUrl = `https://t.me/${botUsername}?start=shared`;
-                
-                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
-            } else {
-                alert('Share feature! This would let users share your Mini App with others.');
-            }
-        }
-        
-        // Add fade-in animation on scroll
-        function addFadeInAnimation() {
-            const cards = document.querySelectorAll('.feature-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s forwards`;
-                }, 100);
-            });
-        }
-        
-        // Initialize animations
-        document.addEventListener('DOMContentLoaded', addFadeInAnimation);
-        
-        // Handle back button
-        if (tg) {
-            tg.BackButton.onClick(() => {
-                showMainPage();
-            });
-        }
-    </script>
-</body>
-</html> + Math.floor(current).toLocaleString();
-                        }
-                    }, 30);
-                }
-            });
         }
         
         function showTrialPage() {
-            const mainPage = document.getElementById('mainPage');
-            const trialPage = document.getElementById('trialPage');
+            document.getElementById('mainPage').classList.remove('active');
+            document.getElementById('trialPage').classList.add('active');
             
-            mainPage.classList.add('slide-out-left');
-            
-            setTimeout(() => {
-                mainPage.classList.remove('active', 'slide-out-left');
-                trialPage.classList.add('active');
-                
-                if (tg) {
-                    tg.BackButton.show();
-                    tg.BackButton.onClick(() => showMainPage());
-                }
-            }, 250);
+            if (tg) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => showMainPage());
+            }
         }
         
         function showMainPage() {
             // Hide all pages first
             const pages = document.querySelectorAll('.page');
-            pages.forEach(page => {
-                page.classList.remove('active', 'slide-out-left');
-            });
+            pages.forEach(page => page.classList.remove('active'));
             
-            // Show main page with slide in animation
-            const mainPage = document.getElementById('mainPage');
-            mainPage.classList.add('active');
+            // Show main page
+            document.getElementById('mainPage').classList.add('active');
             
             if (tg) {
                 tg.BackButton.hide();
@@ -1182,34 +917,17 @@
             }
         }
         
-        
         function handleShareApp() {
             if (tg) {
-                // Use Telegram's native sharing
                 const botUsername = 'your_bot_username'; // Replace with your actual bot username
-                const shareText = `Check out these amazing trading signals! 📈🚀`;
-                const shareUrl = `https://t.me/${botUsername}?start=shared`;
+                const shareText = 'Check out these amazing trading signals! 📈🚀';
+                const shareUrl = 'https://t.me/' + botUsername + '?start=shared';
                 
-                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+                tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText));
             } else {
                 alert('Share feature! This would let users share your Mini App with others.');
             }
         }
-        
-        // Add fade-in animation on scroll
-        function addFadeInAnimation() {
-            const cards = document.querySelectorAll('.feature-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s forwards`;
-                }, 100);
-            });
-        }
-        
-        // Initialize animations
-        document.addEventListener('DOMContentLoaded', addFadeInAnimation);
         
         // Handle back button
         if (tg) {
