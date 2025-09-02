@@ -880,7 +880,7 @@
                     <div class="status-dot"></div>
                     LIVE
                 </div>
-                <div class="logo">📈</div>
+                <div class="logo">▲</div>
                 <h1>Trading Signals</h1>
                 <p class="header-subtitle">Institutional-Grade Market Intelligence</p>
                 <div class="live-ticker">REAL-TIME ANALYSIS ACTIVE</div>
@@ -891,7 +891,7 @@
                     <span class="user-avatar" id="userAvatar">U</span>
                     <div style="display: inline-block; vertical-align: middle;">
                         <div class="welcome-text">Welcome, <strong id="userName">Trader</strong></div>
-                        <div class="user-status">Premium Access Granted</div>
+                        <div class="user-status">Trial Access Available</div>
                     </div>
                 </div>
                 
@@ -924,7 +924,7 @@
                     </div>
                     
                     <div class="feature-card-half" onclick="showFeatureDetails('telegram')">
-                        <div class="feature-icon">📱</div>
+                        <div class="feature-icon">●</div>
                         <h3>Native Integration</h3>
                         <p>Seamless Telegram delivery with zero external dependencies</p>
                     </div>
@@ -992,7 +992,7 @@
                 </div>
                 
                 <div class="trial-option" onclick="startTrial()">
-                    <h3>🚀 7-Day Premium Trial</h3>
+                    <h3>► 7-Day Premium Trial</h3>
                     <ul class="trial-conditions">
                         <li>1-2 premium signals daily</li>
                         <li>Real-time market analysis</li>
@@ -1023,12 +1023,12 @@
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">🎯 Trading Strategy</h3>
+                    <h3 class="section-title">▸ Trading Strategy</h3>
                     <p class="section-text">Our proprietary algorithm analyzes Federal Reserve policy shifts, inflation trajectories, and geopolitical tension indicators. We leverage machine learning models trained on 15+ years of gold market data, focusing on London-New York session overlaps for optimal entry timing. Risk management includes dynamic position sizing based on volatility metrics and correlation analysis with DXY movements.</p>
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">💰 Q4 2024 Performance Examples</h3>
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
                     <div class="returns-grid">
                         <div class="account-return">
                             <div class="account-size">$1,000 Starting Capital</div>
@@ -1064,12 +1064,12 @@
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">🎯 Trading Strategy</h3>
+                    <h3 class="section-title">▸ Trading Strategy</h3>
                     <p class="section-text">Advanced momentum capture system focusing on tech sector rotations and earnings-driven volatility. Our models process real-time sentiment from tech earnings calls, Fed policy impacts on growth stocks, and institutional flow data. We utilize pre-market gap analysis and algorithmic breakout detection for high-probability entries during key market sessions.</p>
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">💰 Q4 2024 Performance Examples</h3>
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
                     <div class="returns-grid">
                         <div class="account-return">
                             <div class="account-size">$1,000 Starting Capital</div>
@@ -1105,12 +1105,12 @@
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">🎯 Trading Strategy</h3>
+                    <h3 class="section-title">▸ Trading Strategy</h3>
                     <p class="section-text">Blue-chip momentum system targeting institutional money flows and dividend-driven volatility. Our strategy leverages earnings season patterns, sector rotation analysis, and Federal Reserve policy impact assessment. We focus on pre-market institutional order flow and key support/resistance levels derived from decades of historical price action analysis.</p>
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">💰 Q4 2024 Performance Examples</h3>
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
                     <div class="returns-grid">
                         <div class="account-return">
                             <div class="account-size">$1,000 Starting Capital</div>
@@ -1146,12 +1146,12 @@
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">🎯 Trading Strategy</h3>
+                    <h3 class="section-title">▸ Trading Strategy</h3>
                     <p class="section-text">Cross-continental currency analysis leveraging Bank of England and Federal Reserve policy divergence. Our system processes UK economic indicators, Brexit-related developments, and US dollar strength metrics. We utilize London-New York session overlap volatility and key psychological levels refined through years of Cable trading expertise.</p>
                 </div>
                 
                 <div class="content-section">
-                    <h3 class="section-title">💰 Q4 2024 Performance Examples</h3>
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
                     <div class="returns-grid">
                         <div class="account-return">
                             <div class="account-size">$1,000 Starting Capital</div>
@@ -1209,17 +1209,19 @@
         function showFeatureDetails(feature) {
             const featureDetails = {
                 speed: {
-                    title: '⚡ Lightning Execution Infrastructure',
+                    title: 'Lightning Execution Infrastructure',
                     message: 'Institutional-grade trading infrastructure:\n\n• Sub-millisecond signal processing\n• Redundant cloud architecture across 3 continents\n• 99.97% uptime with automatic failover\n• Direct market data feeds from NYSE/NASDAQ\n• Latency-optimized Telegram delivery\n• Real-time risk monitoring systems'
                 },
                 telegram: {
-                    title: '📱 Native Telegram Integration',
+                    title: 'Native Telegram Integration',
                     message: 'Seamless trading experience within Telegram:\n\n• Zero external app dependencies\n• Instant signal notifications\n• Interactive trade management\n• Secure encrypted communications\n• Cross-device synchronization\n• Professional trading interface'
                 }
             };
             
             const details = featureDetails[feature];
-            if (tg && details) {
+            if (!details) return;
+            
+            if (tg && typeof tg.showPopup === 'function') {
                 tg.showPopup({
                     title: details.title,
                     message: details.message,
@@ -1232,8 +1234,12 @@
                         showTrialPage();
                     }
                 });
-            } else if (details) {
-                alert(details.title + '\n\n' + details.message);
+            } else {
+                // Fallback for non-Telegram environment or if popup fails
+                const userConfirm = confirm(details.title + '\n\n' + details.message + '\n\nWould you like to start your trial?');
+                if (userConfirm) {
+                    showTrialPage();
+                }
             }
         }
         
@@ -1271,7 +1277,7 @@
         function startTrial() {
             if (tg) {
                 tg.showPopup({
-                    title: '🚀 Activate Premium Trial',
+                    title: 'Activate Premium Trial',
                     message: 'Ready to access institutional-grade trading signals?\n\nYour 7-day premium trial includes:\n• Real-time market analysis\n• 1-2 daily premium signals\n• Risk management guidance\n• Priority support access\n\nNo payment required to start.',
                     buttons: [
                         {id: 'activate', type: 'default', text: 'Activate Now'},
@@ -1286,7 +1292,7 @@
                             instruments: ['XAU/USD', 'US100', 'US30', 'GBP/USD'],
                             timestamp: Date.now()
                         }));
-                        tg.showAlert('🎉 Premium trial activated! Your first institutional-grade signal will arrive within 24 hours. Welcome to professional trading.');
+                        tg.showAlert('Premium trial activated! Your first institutional-grade signal will arrive within 24 hours. Welcome to professional trading.');
                         showMainPage();
                     }
                 });
@@ -1298,7 +1304,7 @@
         function handleShareApp() {
             if (tg) {
                 const botUsername = 'your_bot_username'; // Replace with your actual bot username
-                const shareText = 'Join me on this professional trading platform! 📈 Institutional-grade signals with 92% accuracy.';
+                const shareText = 'Join me on this professional trading platform! Institutional-grade signals with 92% accuracy.';
                 const shareUrl = 'https://t.me/' + botUsername + '?start=premium_referral';
                 
                 tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText));
