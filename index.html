@@ -27,6 +27,7 @@
             min-height: 100vh;
             box-shadow: 0 0 30px rgba(138, 124, 255, 0.1);
             position: relative;
+            overflow: hidden;
         }
         
         .header {
@@ -50,9 +51,25 @@
             animation: pulse 4s ease-in-out infinite;
         }
         
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.1), transparent);
+            animation: sweep 3s ease-in-out infinite;
+        }
+        
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.5; }
             50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        @keyframes sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .logo {
@@ -68,6 +85,12 @@
             position: relative;
             z-index: 1;
             border: 2px solid rgba(138, 124, 255, 0.3);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
         .header h1 {
@@ -76,6 +99,7 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
         }
         
         .header p {
@@ -83,6 +107,18 @@
             opacity: 0.9;
             position: relative;
             z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .content {
@@ -93,28 +129,57 @@
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
+            opacity: 0;
+            animation: slideInLeft 0.6s ease-out 0.4s both;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .feature-card-half {
-            background: #1D2E5E;
+            background: rgba(29, 46, 94, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(138, 124, 255, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
             overflow: hidden;
             cursor: pointer;
             flex: 1;
         }
         
-        .feature-card-half:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(138, 124, 255, 0.2);
-            border-color: rgba(138, 124, 255, 0.3);
+        .feature-card-half::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.1), transparent);
+            transition: left 0.6s;
         }
         
-        .feature-card-half::before {
+        .feature-card-half:hover::before {
+            left: 100%;
+        }
+        
+        .feature-card-half:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(138, 124, 255, 0.3);
+            border-color: rgba(138, 124, 255, 0.5);
+        }
+        
+        .feature-card-half::after {
             content: '';
             position: absolute;
             top: 0;
@@ -136,6 +201,11 @@
             font-size: 16px;
             margin-bottom: 12px;
             box-shadow: 0 4px 15px rgba(138, 124, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card-half:hover .feature-icon {
+            transform: rotate(10deg) scale(1.1);
         }
         
         .feature-card-half h3 {
@@ -803,6 +873,50 @@
             tg.MainButton.onClick(handleGetStarted);
         }
         
+        // Animated counter function
+        function animateCounter(element, target, suffix = '', duration = 2000) {
+            let start = 0;
+            let startTime = null;
+            
+            function animate(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const progress = (currentTime - startTime) / duration;
+                
+                if (progress < 1) {
+                    const current = Math.floor(start + (target - start) * easeOutQuart(progress));
+                    element.textContent = current + suffix;
+                    requestAnimationFrame(animate);
+                } else {
+                    element.textContent = target + suffix;
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        function easeOutQuart(t) {
+            return 1 - (--t) * t * t * t;
+        }
+        
+        // Initialize counters when page loads
+        function initializeCounters() {
+            setTimeout(() => {
+                const statNumbers = document.querySelectorAll('.stat-number');
+                statNumbers.forEach((stat, index) => {
+                    const text = stat.textContent;
+                    if (text.includes('500BN')) {
+                        stat.textContent = '0BN';
+                        animateCounter(stat, 500, 'BN', 2000);
+                    } else if (text.includes('92%')) {
+                        stat.textContent = '0%';
+                        animateCounter(stat, 92, '%', 2000);
+                    } else if (text.includes('24/7')) {
+                        // Keep as is for 24/7
+                    }
+                });
+            }, 600);
+        }
+        
         function handleGetStarted() {
             showTrialPage();
         }
@@ -834,32 +948,208 @@
         }
         
         function showInstrumentPage(instrument) {
-            document.getElementById('mainPage').classList.remove('active');
-            document.getElementById(instrument + 'Page').classList.add('active');
+            const mainPage = document.getElementById('mainPage');
+            const targetPage = document.getElementById(instrument + 'Page');
             
+            // Add slide out animation to main page
+            mainPage.classList.add('slide-out-left');
+            
+            setTimeout(() => {
+                mainPage.classList.remove('active', 'slide-out-left');
+                targetPage.classList.add('active');
+                
+                // Animate profit numbers on instrument page
+                setTimeout(() => animateInstrumentCounters(instrument), 300);
+                
+                if (tg) {
+                    tg.BackButton.show();
+                    tg.BackButton.onClick(() => showMainPage());
+                }
+            }, 250);
+        }
+        
+        function animateInstrumentCounters(instrument) {
+            const profitElements = document.querySelectorAll(`#${instrument}Page .account-profit`);
+            
+            profitElements.forEach(element => {
+                const text = element.textContent;
+                const match = text.match(/\+\$([0-9,]+)/);
+                if (match) {
+                    const target = parseInt(match[1].replace(',', ''));
+                    element.textContent = '+$0';
+                    
+                    let current = 0;
+                    const increment = target / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            element.textContent = '+
+        
+        function startTrial() {
             if (tg) {
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => showMainPage());
+                tg.showPopup({
+                    title: '🚀 Start Your Free Trial',
+                    message: 'Ready to begin your 7-day free trial?\n\nYou\'ll receive 1-2 premium signals per day starting immediately. No credit card required.',
+                    buttons: [
+                        {id: 'start', type: 'default', text: 'Yes, Start Trial!'},
+                        {id: 'cancel', type: 'cancel', text: 'Not now'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'start') {
+                        tg.sendData(JSON.stringify({
+                            action: 'start_trial',
+                            user_id: tg.initDataUnsafe?.user?.id,
+                            plan: '7_day_trial',
+                            timestamp: Date.now()
+                        }));
+                        tg.showAlert('🎉 Welcome to your free trial! You\'ll receive your first signal within 24 hours.');
+                        showMainPage();
+                    }
+                });
+            } else {
+                alert('Trial started! In Telegram, this would send your registration to the bot.');
             }
         }
         
-        function showTrialPage() {
-            document.getElementById('mainPage').classList.remove('active');
-            document.getElementById('trialPage').classList.add('active');
-            
+        
+        function handleShareApp() {
             if (tg) {
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => showMainPage());
+                // Use Telegram's native sharing
+                const botUsername = 'your_bot_username'; // Replace with your actual bot username
+                const shareText = `Check out these amazing trading signals! 📈🚀`;
+                const shareUrl = `https://t.me/${botUsername}?start=shared`;
+                
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+            } else {
+                alert('Share feature! This would let users share your Mini App with others.');
             }
+        }
+        
+        // Add fade-in animation on scroll
+        function addFadeInAnimation() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s forwards`;
+                }, 100);
+            });
+        }
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', addFadeInAnimation);
+        
+        // Handle back button
+        if (tg) {
+            tg.BackButton.onClick(() => {
+                showMainPage();
+            });
+        }
+    </script>
+</body>
+</html> + target.toLocaleString();
+                            clearInterval(timer);
+                        } else {
+                            element.textContent = '+
+        
+        function startTrial() {
+            if (tg) {
+                tg.showPopup({
+                    title: '🚀 Start Your Free Trial',
+                    message: 'Ready to begin your 7-day free trial?\n\nYou\'ll receive 1-2 premium signals per day starting immediately. No credit card required.',
+                    buttons: [
+                        {id: 'start', type: 'default', text: 'Yes, Start Trial!'},
+                        {id: 'cancel', type: 'cancel', text: 'Not now'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'start') {
+                        tg.sendData(JSON.stringify({
+                            action: 'start_trial',
+                            user_id: tg.initDataUnsafe?.user?.id,
+                            plan: '7_day_trial',
+                            timestamp: Date.now()
+                        }));
+                        tg.showAlert('🎉 Welcome to your free trial! You\'ll receive your first signal within 24 hours.');
+                        showMainPage();
+                    }
+                });
+            } else {
+                alert('Trial started! In Telegram, this would send your registration to the bot.');
+            }
+        }
+        
+        
+        function handleShareApp() {
+            if (tg) {
+                // Use Telegram's native sharing
+                const botUsername = 'your_bot_username'; // Replace with your actual bot username
+                const shareText = `Check out these amazing trading signals! 📈🚀`;
+                const shareUrl = `https://t.me/${botUsername}?start=shared`;
+                
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+            } else {
+                alert('Share feature! This would let users share your Mini App with others.');
+            }
+        }
+        
+        // Add fade-in animation on scroll
+        function addFadeInAnimation() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s forwards`;
+                }, 100);
+            });
+        }
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', addFadeInAnimation);
+        
+        // Handle back button
+        if (tg) {
+            tg.BackButton.onClick(() => {
+                showMainPage();
+            });
+        }
+    </script>
+</body>
+</html> + Math.floor(current).toLocaleString();
+                        }
+                    }, 30);
+                }
+            });
+        }
+        
+        function showTrialPage() {
+            const mainPage = document.getElementById('mainPage');
+            const trialPage = document.getElementById('trialPage');
+            
+            mainPage.classList.add('slide-out-left');
+            
+            setTimeout(() => {
+                mainPage.classList.remove('active', 'slide-out-left');
+                trialPage.classList.add('active');
+                
+                if (tg) {
+                    tg.BackButton.show();
+                    tg.BackButton.onClick(() => showMainPage());
+                }
+            }, 250);
         }
         
         function showMainPage() {
             // Hide all pages first
             const pages = document.querySelectorAll('.page');
-            pages.forEach(page => page.classList.remove('active'));
+            pages.forEach(page => {
+                page.classList.remove('active', 'slide-out-left');
+            });
             
-            // Show main page
-            document.getElementById('mainPage').classList.add('active');
+            // Show main page with slide in animation
+            const mainPage = document.getElementById('mainPage');
+            mainPage.classList.add('active');
             
             if (tg) {
                 tg.BackButton.hide();
