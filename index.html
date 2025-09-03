@@ -1179,6 +1179,18 @@
     <script>
         // Initialize Telegram Web App
         let tg = window.Telegram?.WebApp;
+
+        // NEW: force-scroll helper to ensure every page opens at the very top
+        function scrollToTop() {
+            // Reset common scroll hosts
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            const container = document.querySelector('.container');
+            if (container) container.scrollTop = 0;
+            const active = document.querySelector('.page.active');
+            if (active) active.scrollTop = 0;
+        }
         
         if (tg) {
             tg.ready();
@@ -1251,6 +1263,8 @@
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => showMainPage());
             }
+            // NEW: ensure we land at the top when opening an instrument page
+            scrollToTop();
         }
         
         function showTrialPage() {
@@ -1261,6 +1275,8 @@
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => showMainPage());
             }
+            // NEW: ensure we land at the top when opening the trial page
+            scrollToTop();
         }
         
         function showMainPage() {
@@ -1272,6 +1288,8 @@
             if (tg) {
                 tg.BackButton.hide();
             }
+            // NEW: ensure we land at the top when returning to main
+            scrollToTop();
         }
         
         function startTrial() {
