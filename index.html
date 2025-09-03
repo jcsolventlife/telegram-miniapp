@@ -1,1052 +1,1342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcadia Capital — Institutional Signals</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --bg: #0b1324;            /* deep navy */
-      --panel: #0f1a33;         /* slightly lighter navy */
-      --panel-2: #0c172c;
-      --ink: #e8ebf3;           /* soft white */
-      --muted: #9aa3b2;         /* slate */
-      --line: rgba(255,255,255,.08);
-      --accent: #c9a86a;        /* investment gold */
-      --accent-2: #8aa4ff;      /* cool accent */
-      --success: #62d6a6;
-      --danger: #ff8a8a;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-      --radius-xl: 28px;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --radius-sm: 12px;
-      --maxw: 520px;            /* mobile-first, premium density */
-      --space: 22px;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--ink);
-      background: radial-gradient(1200px 800px at 50% -200px, rgba(201,168,106,.14), transparent 60%),
-                  radial-gradient(900px 600px at 120% 10%, rgba(138,164,255,.12), transparent 50%),
-                  var(--bg);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .container {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      min-height: 100dvh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* Top Brand Bar */
-    .brandbar {
-      position: sticky; top: 0; z-index: 20;
-      backdrop-filter: saturate(120%) blur(10px);
-      background: linear-gradient(to bottom, rgba(11,19,36,.85), rgba(11,19,36,.55));
-      border-bottom: 1px solid var(--line);
-    }
-    .brandbar-inner { display:flex; align-items:center; gap:12px; padding: 14px var(--space); }
-    .logo {
-      width: 38px; height:38px; border-radius: 10px;
-      display:grid; place-items:center;
-      background: linear-gradient(135deg, rgba(201,168,106,.15), rgba(138,164,255,.12));
-      border: 1px solid var(--line);
-      color: var(--accent);
-      font-weight: 800;
-      letter-spacing: .5px;
-    }
-    .brand { line-height:1; }
-    .brand h1 { margin:0; font-size: 15px; font-weight: 800; letter-spacing: .6px; }
-    .brand p { margin:2px 0 0; font-size: 11px; color: var(--muted); letter-spacing: .4px; }
-    .status {
-      margin-left:auto; display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 11px;
-    }
-    .dot { width:7px; height:7px; border-radius:50%; background: var(--success); box-shadow:0 0 0 0 rgba(98,214,166,.6); animation: ping 2.4s infinite; }
-    @keyframes ping { 0%{ box-shadow:0 0 0 0 rgba(98,214,166,.6);} 70%{ box-shadow:0 0 0 10px rgba(98,214,166,0);} 100%{ box-shadow:0 0 0 0 rgba(98,214,166,0);} }
-
-    /* Hero */
-    .hero {
-      padding: 28px var(--space) 18px;
-      border-bottom: 1px solid var(--line);
-      background:
-        radial-gradient(600px 260px at 50% -80px, rgba(201,168,106,.18), transparent 70%),
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-    }
-    .headline {
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-      font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -.2px;
-    }
-    .kicker { margin-top:10px; color: var(--muted); font-size: 13px; }
-
-    /* KPI strip */
-    .kpi {
-      display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top:18px;
-    }
-    .kpi .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
-      border: 1px solid var(--line); border-radius: var(--radius-md);
-      padding: 14px; text-align:center; position:relative; overflow:hidden;
-    }
-    .kpi .card:before { content:""; position:absolute; inset:0; background: linear-gradient(90deg, rgba(201,168,106,.12), transparent 30%, transparent 70%, rgba(138,164,255,.12)); opacity:.35; mask: linear-gradient(#000 0 0); }
-    .metric { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-weight:800; font-size: 18px; }
-    .label { color: var(--muted); font-size: 10px; letter-spacing: .4px; text-transform: uppercase; margin-top: 4px; }
-
-    /* Page Shell */
-    .page { display:none; opacity:0; transform: translateY(8px); transition: opacity .28s ease, transform .28s ease; }
-    .page.active { display:block; opacity:1; transform: translateY(0); }
-
-    /* Sections */
-    .section { padding: 22px var(--space); }
-    .section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
-    .section-title h2 { font-size: 14px; letter-spacing: .3px; font-weight: 800; margin:0; }
-    .section-title .sub { color: var(--muted); font-size: 12px; }
-
-    /* Instruments Grid */
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .inst {
-      border: 1px solid var(--line); border-radius: var(--radius-lg); overflow:hidden; cursor:pointer;
-      background: linear-gradient(180deg, rgba(12,23,44,1), rgba(12,23,44,.6));
-      box-shadow: var(--shadow);
-      transition: transform .25s ease, border-color .25s ease;
-      position: relative;
-    }
-    .inst:hover { transform: translateY(-4px); border-color: rgba(201,168,106,.35); }
-    .inst .topbar {
-      height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    }
-    .inst .body { padding: 14px; text-align:center; }
-    .sym { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15px; font-weight: 800; letter-spacing: .4px; }
-    .nm { color: var(--muted); font-size: 10px; letter-spacing: .4px; text-transform: uppercase; margin-top: 4px; }
-    .ret { margin-top: 10px; font-weight: 900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--success); font-size: 16px; }
-
-    /* Feature Cards */
-    .feature-row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .feature {
-      border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px; background: var(--panel);
-      position:relative; overflow:hidden; cursor:pointer; transition: transform .25s ease, border-color .25s ease;
-    }
-    .feature:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.12); }
-    .feature h3 { margin: 4px 0 6px; font-size: 13px; letter-spacing: .2px; }
-    .feature p { margin:0; color: var(--muted); font-size: 12px; line-height: 1.45; }
-    .badge { display:inline-block; padding: 6px 10px; border-radius: 999px; border:1px solid var(--line); background: rgba(255,255,255,.02); font-size: 11px; letter-spacing: .3px; }
-
-    /* Headers inside detail pages */
-    .pagehead { padding: 24px var(--space) 16px; border-bottom:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); }
-    .pagehead h2 { margin:0 0 8px; font-size: 22px; font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif; }
-    .pagehead .sub { color: var(--muted); font-size: 13px; }
-    .highlight { margin-top: 10px; font-weight: 900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--accent); font-size: 18px; }
-
-    .content-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: 18px;
-      margin: 16px var(--space) 0;
-    }
-    .content-card h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .3px; }
-    .content-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
-
-    .returns { display:grid; gap: 12px; margin-top: 10px; }
-    .retcard { border: 1px solid var(--line); background: var(--panel-2); border-radius: var(--radius-md); padding: 14px; }
-    .retcard .sz { font-weight: 700; }
-    .retcard .amt { margin-top:6px; font-weight:900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--success); font-size: 18px; }
-    .retcard .meta { margin-top:4px; color: var(--muted); font-size: 12px; }
-
-    /* CTA Footer */
-    .cta {
-      border-top:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-      padding: 18px var(--space) 24px; position: sticky; bottom: 0; z-index: 10;
-    }
-    .cta .title { font-size: 14px; font-weight: 800; letter-spacing: .3px; }
-    .cta .sub { color: var(--muted); font-size: 12px; margin-top:4px; }
-    .cta-actions { margin-top: 14px; display:grid; gap: 10px; }
-    .btn {
-      appearance: none; border: 1px solid var(--line); border-radius: 999px; padding: 16px 20px; font-weight: 800; letter-spacing: .2px; cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), #b09055); color: #0a0f1a; box-shadow: 0 10px 30px rgba(201,168,106,.25);
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(201,168,106,.35); }
-    .btn.secondary { background: transparent; color: var(--ink); border-color: rgba(255,255,255,.14); box-shadow: none; }
-    .btn.secondary:hover { border-color: rgba(255,255,255,.24); }
-
-    /* Back button */
-    .back { margin: 14px var(--space) 0; }
-    .back button { background: transparent; border:1px solid var(--line); color: var(--ink); padding:10px 14px; border-radius: 999px; font-weight:700; letter-spacing:.2px; cursor:pointer; }
-    .back button:hover { border-color: rgba(255,255,255,.22); }
-
-    /* Accessibility: motion */
-    @media (prefers-reduced-motion: reduce) {
-      .page { transition: none; }
-      .inst, .feature { transition: none; }
-      .btn { transition: none; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Trading Signals</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0A0A12;
+            min-height: 100vh;
+            color: #E8EAF1;
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #131422;
+            min-height: 100vh;
+            box-shadow: 0 0 40px rgba(138, 124, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Premium Header with Market Data Feel */
+        .header {
+            background: linear-gradient(135deg, #1D2E5E 0%, #131422 100%);
+            color: #E8EAF1;
+            padding: 30px 20px 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(138, 124, 255, 0.15);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(138, 124, 255, 0.08) 0%, transparent 70%);
+            animation: pulse 6s ease-in-out infinite;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #8A7CFF, transparent);
+            animation: scan 3s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.05); opacity: 0.6; }
+        }
+        
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .market-status {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: #9AA2B4;
+            z-index: 10;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #8A7CFF;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: blink 2s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: rgba(138, 124, 255, 0.15);
+            border: 2px solid rgba(138, 124, 255, 0.3);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+            animation: logoFloat 4s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-subtitle {
+            font-size: 13px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        .live-ticker {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: rgba(138, 124, 255, 0.1);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            display: inline-block;
+        }
+        
+        .content {
+            padding: 25px 20px;
+        }
+        
+        /* Enhanced User Welcome */
+        .telegram-user-info {
+            background: rgba(138, 124, 255, 0.12);
+            backdrop-filter: blur(15px);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid rgba(138, 124, 255, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .telegram-user-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .telegram-user-info.show {
+            display: block;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8A7CFF, #6C7690);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 15px;
+            vertical-align: middle;
+            box-shadow: 0 0 25px rgba(138, 124, 255, 0.4);
+            font-size: 16px;
+        }
+        
+        .welcome-text {
+            color: #E8EAF1;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .user-status {
+            color: #9AA2B4;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        /* Professional Stats Dashboard */
+        .stats-dashboard {
+            background: rgba(29, 46, 94, 0.4);
+            backdrop-filter: blur(20px);
+            margin: 25px 0;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+        
+        .stats-header {
+            padding: 20px 25px 15px;
+            border-bottom: 1px solid rgba(138, 124, 255, 0.15);
+            background: rgba(138, 124, 255, 0.05);
+        }
+        
+        .stats-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #E8EAF1;
+            margin-bottom: 5px;
+            letter-spacing: 0.3px;
+        }
+        
+        .stats-period {
+            font-size: 11px;
+            color: #9AA2B4;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 25px;
+            gap: 0;
+            position: relative;
+        }
+        
+        .stats-grid::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(138, 124, 255, 0.05), transparent);
+            animation: rotate 12s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .stat {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, rgba(138, 124, 255, 0.3), transparent);
+        }
+        
+        .stat-number {
+            font-size: 22px;
+            font-weight: 800;
+            color: #8A7CFF;
+            text-shadow: 0 0 20px rgba(138, 124, 255, 0.6);
+            margin-bottom: 5px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #9AA2B4;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        /* Enhanced Feature Cards */
+        .feature-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card-half {
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .feature-card-half::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .feature-card-half::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+        
+        .feature-card-half:hover::after {
+            left: 100%;
+        }
+        
+        .feature-card-half:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(138, 124, 255, 0.25);
+            border-color: rgba(138, 124, 255, 0.4);
+        }
+        
+        .feature-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #8A7CFF, #6C7690);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 20px rgba(138, 124, 255, 0.4);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card-half:hover .feature-icon {
+            transform: rotate(5deg) scale(1.1);
+        }
+        
+        .feature-card-half h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #E8EAF1;
+            letter-spacing: -0.2px;
+        }
+        
+        .feature-card-half p {
+            color: #9AA2B4;
+            line-height: 1.4;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Professional Trading Instruments Section */
+        .instruments-section {
+            margin: 35px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .instruments-title {
+            color: #E8EAF1;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        
+        .instruments-subtitle {
+            color: #9AA2B4;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .instruments-title::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+            margin: 10px auto 0;
+            border-radius: 1px;
+        }
+        
+        .instruments-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .instrument-card {
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            padding: 20px 16px;
+            text-align: center;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .instrument-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .instrument-card:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(138, 124, 255, 0.3);
+            border-color: rgba(138, 124, 255, 0.5);
+        }
+        
+        .instrument-symbol {
+            font-size: 16px;
+            font-weight: 800;
+            color: #E8EAF1;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        .instrument-name {
+            font-size: 10px;
+            color: #9AA2B4;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .instrument-return {
+            color: #8A7CFF;
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(138, 124, 255, 0.6);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        .performance-indicator {
+            margin-top: 8px;
+            font-size: 10px;
+            color: #6C7690;
+            font-weight: 500;
+        }
+        
+        /* Enhanced CTA Section */
+        .cta-section {
+            padding: 35px 20px;
+            text-align: center;
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(138, 124, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #8A7CFF, transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+        
+        .cta-header {
+            margin-bottom: 25px;
+        }
+        
+        .cta-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #E8EAF1;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
+        }
+        
+        .cta-subtitle {
+            font-size: 12px;
+            color: #9AA2B4;
+            font-weight: 500;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #8A7CFF 0%, #6C7690 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            box-shadow: 0 10px 30px rgba(138, 124, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 15px;
+            letter-spacing: -0.2px;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(138, 124, 255, 0.6);
+        }
+        
+        .secondary-button {
+            background: transparent;
+            color: #8A7CFF;
+            border: 2px solid rgba(138, 124, 255, 0.4);
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .secondary-button:hover {
+            background: rgba(138, 124, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(138, 124, 255, 0.3);
+            border-color: rgba(138, 124, 255, 0.6);
+        }
+        
+        /* Page Navigation */
+        .page {
+            display: none;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Back Button */
+        .back-button {
+            background: rgba(138, 124, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: #8A7CFF;
+            border: 1px solid rgba(138, 124, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .back-button:hover {
+            background: rgba(138, 124, 255, 0.25);
+            color: white;
+            transform: translateX(-5px);
+        }
+        
+        /* Enhanced Page Headers */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 25px;
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(138, 124, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .page-header h2 {
+            color: #E8EAF1;
+            margin-bottom: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        
+        .page-subtitle {
+            color: #9AA2B4;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .return-highlight {
+            color: #8A7CFF;
+            font-size: 18px;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(138, 124, 255, 0.6);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        /* Professional Content Sections */
+        .content-section {
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(138, 124, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .section-title {
+            color: #E8EAF1;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -0.2px;
+        }
+        
+        .section-text {
+            color: #9AA2B4;
+            line-height: 1.6;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Enhanced Returns Grid */
+        .returns-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .account-return {
+            background: rgba(138, 124, 255, 0.12);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(138, 124, 255, 0.25);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .account-return::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 124, 255, 0.2), transparent);
+            transition: left 0.8s;
+        }
+        
+        .account-return:hover::before {
+            left: 100%;
+        }
+        
+        .account-return:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(138, 124, 255, 0.25);
+            border-color: rgba(138, 124, 255, 0.4);
+        }
+        
+        .account-size {
+            color: #E8EAF1;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 10px;
+            letter-spacing: -0.1px;
+        }
+        
+        .account-profit {
+            color: #8A7CFF;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px rgba(138, 124, 255, 0.6);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        .account-percentage {
+            color: #9AA2B4;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Trial Page Enhancements */
+        .trial-option {
+            background: rgba(29, 46, 94, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(138, 124, 255, 0.25);
+            transition: all 0.5s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trial-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8A7CFF, #6C7690);
+        }
+        
+        .trial-option:hover {
+            border-color: #8A7CFF;
+            box-shadow: 0 15px 40px rgba(138, 124, 255, 0.3);
+            transform: translateY(-8px);
+        }
+        
+        .trial-option h3 {
+            color: #E8EAF1;
+            margin-bottom: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+        
+        .trial-conditions {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .trial-conditions li {
+            color: #9AA2B4;
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .trial-conditions li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #8A7CFF;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(138, 124, 255, 0.7);
+            font-size: 16px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 380px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 25px 15px 35px 15px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .instruments-grid {
+                gap: 10px;
+            }
+            
+            .feature-row {
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-
-    <!-- NAV / BRAND BAR -->
-    <div class="brandbar">
-      <div class="brandbar-inner">
-        <div class="logo">AC</div>
-        <div class="brand">
-          <h1>Arcadia Capital</h1>
-          <p>Private Markets Intelligence</p>
-        </div>
-        <div class="status"><span class="dot"></span> LIVE</div>
-      </div>
-    </div>
-
-    <!-- MAIN PAGE -->
-    <div id="mainPage" class="page active">
-      <div class="hero">
-        <div class="headline">Institutional signals, distilled for decisive execution.</div>
-        <div class="kicker">Designed with the aesthetic and discipline of a multi‑billion dollar private equity firm. Delivered natively in Telegram.</div>
-        <div class="kpi">
-          <div class="card"><div class="metric">500B+</div><div class="label">Data Points</div></div>
-          <div class="card"><div class="metric">92%</div><div class="label">Model Hit‑Rate*</div></div>
-          <div class="card"><div class="metric">24/7</div><div class="label">Desk Coverage</div></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <h2>Mandates</h2>
-          <span class="sub">Click to open strategy dossiers</span>
-        </div>
-        <div class="grid">
-          <div class="inst" onclick="showInstrumentPage('xauusd')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">XAU/USD</div>
-              <div class="nm">Gold Spot</div>
-              <div class="ret">+24.7% Q4</div>
+    <div class="container">
+        <!-- Main Page -->
+        <div id="mainPage" class="page active">
+            <div class="header">
+                <div class="market-status">
+                    <div class="status-dot"></div>
+                    LIVE
+                </div>
+                <div class="logo">▲</div>
+                <h1>Trading Signals</h1>
+                <p class="header-subtitle">Institutional-Grade Market Intelligence</p>
+                <div class="live-ticker">REAL-TIME ANALYSIS ACTIVE</div>
             </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('us100')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">US100</div>
-              <div class="nm">Nasdaq 100</div>
-              <div class="ret">+31.2% Q4</div>
+            
+            <div class="content">
+                <div class="telegram-user-info" id="userInfo">
+                    <span class="user-avatar" id="userAvatar">U</span>
+                    <div style="display: inline-block; vertical-align: middle;">
+                        <div class="welcome-text">Welcome, <strong id="userName">Trader</strong></div>
+                        <div class="user-status">Trial Access Available</div>
+                    </div>
+                </div>
+                
+                <div class="stats-dashboard">
+                    <div class="stats-header">
+                        <div class="stats-title">Performance Metrics</div>
+                        <div class="stats-period">Q4 2024 • Real-Time Data</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-number">500BN</div>
+                            <div class="stat-label">Data Points</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-label">Accuracy</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-row">
+                    <div class="feature-card-half" onclick="showFeatureDetails('speed')">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Lightning Execution</h3>
+                        <p>Sub-second signal processing with institutional-grade infrastructure</p>
+                    </div>
+                    
+                    <div class="feature-card-half" onclick="showFeatureDetails('telegram')">
+                        <div class="feature-icon">●</div>
+                        <h3>Native Integration</h3>
+                        <p>Seamless Telegram delivery with zero external dependencies</p>
+                    </div>
+                </div>
+                
+                <div class="instruments-section">
+                    <div class="section-header">
+                        <h3 class="instruments-title">Premium Instruments</h3>
+                        <p class="instruments-subtitle">Click any instrument for detailed analysis</p>
+                    </div>
+                    <div class="instruments-grid">
+                        <div class="instrument-card" onclick="showInstrumentPage('xauusd')">
+                            <div class="instrument-symbol">XAU/USD</div>
+                            <div class="instrument-name">Gold Spot</div>
+                            <div class="instrument-return">+24.7%</div>
+                            <div class="performance-indicator">Q4 Performance</div>
+                        </div>
+                        
+                        <div class="instrument-card" onclick="showInstrumentPage('us100')">
+                            <div class="instrument-symbol">US100</div>
+                            <div class="instrument-name">Nasdaq 100</div>
+                            <div class="instrument-return">+31.2%</div>
+                            <div class="performance-indicator">Q4 Performance</div>
+                        </div>
+                        
+                        <div class="instrument-card" onclick="showInstrumentPage('us30')">
+                            <div class="instrument-symbol">US30</div>
+                            <div class="instrument-name">Dow Jones</div>
+                            <div class="instrument-return">+28.5%</div>
+                            <div class="performance-indicator">Q4 Performance</div>
+                        </div>
+                        
+                        <div class="instrument-card" onclick="showInstrumentPage('gbpusd')">
+                            <div class="instrument-symbol">GBP/USD</div>
+                            <div class="instrument-name">Cable</div>
+                            <div class="instrument-return">+19.3%</div>
+                            <div class="performance-indicator">Q4 Performance</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('us30')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">US30</div>
-              <div class="nm">Dow Jones</div>
-              <div class="ret">+28.5% Q4</div>
+            
+            <div class="cta-section">
+                <div class="cta-header">
+                    <div class="cta-title">Start Your Trading Journey</div>
+                    <div class="cta-subtitle">Join thousands of successful traders</div>
+                </div>
+                <button class="cta-button" onclick="showTrialPage()">
+                    Start Free Trial
+                </button>
+                <button class="secondary-button" onclick="handleShareApp()">
+                    Share Platform
+                </button>
             </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('gbpusd')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">GBP/USD</div>
-              <div class="nm">Cable</div>
-              <div class="ret">+19.3% Q4</div>
+        </div>
+        
+        <!-- Trial Page -->
+        <div id="trialPage" class="page">
+            <div style="padding: 20px;">
+                <button class="back-button" onclick="showMainPage()">← Back to Overview</button>
+                
+                <div class="page-header">
+                    <h2>Premium Access</h2>
+                    <p class="page-subtitle">Choose your trading advantage</p>
+                </div>
+                
+                <div class="trial-option" onclick="startTrial()">
+                    <h3>► 7-Day Premium Trial</h3>
+                    <ul class="trial-conditions">
+                        <li>1-2 premium signals daily</li>
+                        <li>Real-time market analysis</li>
+                        <li>Institutional-grade research</li>
+                        <li>Priority Telegram support</li>
+                        <li>Risk management guidance</li>
+                        <li>Cancel anytime, no commitment</li>
+                    </ul>
+                </div>
+                
+                <div class="cta-section">
+                    <button class="cta-button" onclick="startTrial()">
+                        Activate Premium Trial
+                    </button>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <h2>Capabilities</h2>
-          <span class="sub">Built for institutional governance</span>
+        
+        <!-- XAU/USD Page -->
+        <div id="xauusdPage" class="page">
+            <div style="padding: 20px;">
+                <button class="back-button" onclick="showMainPage()">← Back to Instruments</button>
+                
+                <div class="page-header">
+                    <h2>XAU/USD Analysis</h2>
+                    <p class="page-subtitle">Gold Spot • Premium Metal</p>
+                    <div class="return-highlight">+24.7% Q4 Returns</div>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Trading Strategy</h3>
+                    <p class="section-text">Our proprietary algorithm analyzes Federal Reserve policy shifts, inflation trajectories, and geopolitical tension indicators. We leverage machine learning models trained on 15+ years of gold market data, focusing on London-New York session overlaps for optimal entry timing. Risk management includes dynamic position sizing based on volatility metrics and correlation analysis with DXY movements.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
+                    <div class="returns-grid">
+                        <div class="account-return">
+                            <div class="account-size">$1,000 Starting Capital</div>
+                            <div class="account-profit">+$247</div>
+                            <div class="account-percentage">24.7% net return • 47 signals executed</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$10,000 Starting Capital</div>
+                            <div class="account-profit">+$2,470</div>
+                            <div class="account-percentage">24.7% net return • Compound growth applied</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$100,000 Starting Capital</div>
+                            <div class="account-profit">+$24,700</div>
+                            <div class="account-percentage">24.7% net return • Institutional sizing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="feature-row">
-          <div class="feature" onclick="showFeatureDetails('speed')">
-            <span class="badge">Execution</span>
-            <h3>Latency‑Optimised Infrastructure</h3>
-            <p>Sub‑millisecond pipelines, redundant regions, continuous monitoring, and deterministic delivery.</p>
-          </div>
-          <div class="feature" onclick="showFeatureDetails('telegram')">
-            <span class="badge">Distribution</span>
-            <h3>Native Telegram Delivery</h3>
-            <p>Encrypted, cross‑device, and immediate. No external dependencies.</p>
-          </div>
+        
+        <!-- US100 Page -->
+        <div id="us100Page" class="page">
+            <div style="padding: 20px;">
+                <button class="back-button" onclick="showMainPage()">← Back to Instruments</button>
+                
+                <div class="page-header">
+                    <h2>US100 Analysis</h2>
+                    <p class="page-subtitle">Nasdaq 100 • Tech Innovation Index</p>
+                    <div class="return-highlight">+31.2% Q4 Returns</div>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Trading Strategy</h3>
+                    <p class="section-text">Advanced momentum capture system focusing on tech sector rotations and earnings-driven volatility. Our models process real-time sentiment from tech earnings calls, Fed policy impacts on growth stocks, and institutional flow data. We utilize pre-market gap analysis and algorithmic breakout detection for high-probability entries during key market sessions.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
+                    <div class="returns-grid">
+                        <div class="account-return">
+                            <div class="account-size">$1,000 Starting Capital</div>
+                            <div class="account-profit">+$312</div>
+                            <div class="account-percentage">31.2% net return • 52 signals executed</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$10,000 Starting Capital</div>
+                            <div class="account-profit">+$3,120</div>
+                            <div class="account-percentage">31.2% net return • Advanced risk management</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$100,000 Starting Capital</div>
+                            <div class="account-profit">+$31,200</div>
+                            <div class="account-percentage">31.2% net return • Portfolio optimization</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <div class="cta">
-        <div class="title">Start your premium trial</div>
-        <div class="sub">Institutional‑grade research and real‑time signals. Cancel anytime.</div>
-        <div class="cta-actions">
-          <button class="btn" onclick="showTrialPage()">Activate Free Trial</button>
-          <button class="btn secondary" onclick="handleShareApp()">Share Platform</button>
+        
+        <!-- US30 Page -->
+        <div id="us30Page" class="page">
+            <div style="padding: 20px;">
+                <button class="back-button" onclick="showMainPage()">← Back to Instruments</button>
+                
+                <div class="page-header">
+                    <h2>US30 Analysis</h2>
+                    <p class="page-subtitle">Dow Jones • Blue Chip Excellence</p>
+                    <div class="return-highlight">+28.5% Q4 Returns</div>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Trading Strategy</h3>
+                    <p class="section-text">Blue-chip momentum system targeting institutional money flows and dividend-driven volatility. Our strategy leverages earnings season patterns, sector rotation analysis, and Federal Reserve policy impact assessment. We focus on pre-market institutional order flow and key support/resistance levels derived from decades of historical price action analysis.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
+                    <div class="returns-grid">
+                        <div class="account-return">
+                            <div class="account-size">$1,000 Starting Capital</div>
+                            <div class="account-profit">+$285</div>
+                            <div class="account-percentage">28.5% net return • 49 signals executed</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$10,000 Starting Capital</div>
+                            <div class="account-profit">+$2,850</div>
+                            <div class="account-percentage">28.5% net return • Diversified approach</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$100,000 Starting Capital</div>
+                            <div class="account-profit">+$28,500</div>
+                            <div class="account-percentage">28.5% net return • Institutional execution</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+        
+        <!-- GBP/USD Page -->
+        <div id="gbpusdPage" class="page">
+            <div style="padding: 20px;">
+                <button class="back-button" onclick="showMainPage()">← Back to Instruments</button>
+                
+                <div class="page-header">
+                    <h2>GBP/USD Analysis</h2>
+                    <p class="page-subtitle">Cable • Transatlantic Volatility</p>
+                    <div class="return-highlight">+19.3% Q4 Returns</div>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Trading Strategy</h3>
+                    <p class="section-text">Cross-continental currency analysis leveraging Bank of England and Federal Reserve policy divergence. Our system processes UK economic indicators, Brexit-related developments, and US dollar strength metrics. We utilize London-New York session overlap volatility and key psychological levels refined through years of Cable trading expertise.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h3 class="section-title">▸ Q4 2024 Performance Examples</h3>
+                    <div class="returns-grid">
+                        <div class="account-return">
+                            <div class="account-size">$1,000 Starting Capital</div>
+                            <div class="account-profit">+$193</div>
+                            <div class="account-percentage">19.3% net return • 41 signals executed</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$10,000 Starting Capital</div>
+                            <div class="account-profit">+$1,930</div>
+                            <div class="account-percentage">19.3% net return • Currency expertise</div>
+                        </div>
+                        
+                        <div class="account-return">
+                            <div class="account-size">$100,000 Starting Capital</div>
+                            <div class="account-profit">+$19,300</div>
+                            <div class="account-percentage">19.3% net return • FX specialization</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- TRIAL PAGE -->
-    <div id="trialPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Overview</button></div>
-      <div class="pagehead">
-        <h2>Premium Access</h2>
-        <div class="sub">Choose your trading advantage</div>
-      </div>
-      <div class="content-card">
-        <h3>► 7‑Day Premium Trial</h3>
-        <p>1–2 premium signals daily • Real‑time market analysis • Institutional‑grade research • Priority Telegram support • Risk framework guidance • Cancel anytime</p>
-      </div>
-      <div class="cta">
-        <button class="btn" onclick="startTrial()">Activate Premium Trial</button>
-      </div>
-    </div>
+    <script>
+        // Initialize Telegram Web App
+        let tg = window.Telegram?.WebApp;
 
-    <!-- XAU/USD PAGE -->
-    <div id="xauusdPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>XAU/USD — Gold</h2>
-        <div class="sub">Spot metal • London/NY overlap focus</div>
-        <div class="highlight">+24.7% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Algorithmic blend of Fed regime shifts, inflation term‑structure, and geopolitical stress signals. Session‑aware entries with dynamic sizing from realised volatility and DXY correlation.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$247</div><div class="meta">24.7% • 47 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$2,470</div><div class="meta">24.7% • Compounding</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$24,700</div><div class="meta">24.7% • Institutional sizing</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- US100 PAGE -->
-    <div id="us100Page" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>US100 — Nasdaq 100</h2>
-        <div class="sub">Tech momentum • Earnings‑cycle sensitive</div>
-        <div class="highlight">+31.2% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Momentum capture across sector rotations, earnings volatility, and policy beta. Pre‑market gap structures and breakout detection guide execution windows.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$312</div><div class="meta">31.2% • 52 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$3,120</div><div class="meta">31.2% • Advanced risk</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$31,200</div><div class="meta">31.2% • Portfolio‑level</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- US30 PAGE -->
-    <div id="us30Page" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>US30 — Dow Jones</h2>
-        <div class="sub">Blue‑chip factor • Dividend/flow aware</div>
-        <div class="highlight">+28.5% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Institutional flow and dividend‑season dynamics with long‑horizon support/resistance regimes. Execution biased to pre‑ and post‑open liquidity pockets.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$285</div><div class="meta">28.5% • 49 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$2,850</div><div class="meta">28.5% • Diversified</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$28,500</div><div class="meta">28.5% • Institutional</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- GBP/USD PAGE -->
-    <div id="gbpusdPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>GBP/USD — Cable</h2>
-        <div class="sub">BoE/Fed divergence • London/NY overlap</div>
-        <div class="highlight">+19.3% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Policy divergence, UK macro surprises, and USD strength composites. Psychological levels and London session structure inform entry discipline.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$193</div><div class="meta">19.3% • 41 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$1,930</div><div class="meta">19.3% • Currency expertise</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$19,300</div><div class="meta">19.3% • FX specialization</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-  </div>
-
-  <script>
-    // Telegram bootstrap
-    let tg = window.Telegram?.WebApp;
-
-    // Ensure every page opens at the top
-    function scrollToTop() {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const container = document.querySelector('.container');
-      if (container) container.scrollTop = 0;
-      const active = document.querySelector('.page.active');
-      if (active) active.scrollTop = 0;
-    }
-
-    if (tg) {
-      tg.ready();
-      // NOTE: Do not call tg.expand() on load if you want the web app to open in half-height mode.
-// Theme nudge (optional): if Telegram provides bg, respect it slightly
-      if (tg.themeParams?.bg_color) {
-        document.body.style.backgroundColor = tg.themeParams.bg_color;
-      }
-      tg.MainButton.text = 'Start Premium Trial';
-      tg.MainButton.show();
-      tg.MainButton.onClick(() => showTrialPage());
-    }
-
-    // Feature detail popups
-    function showFeatureDetails(feature) {
-      const featureDetails = {
-        speed: {
-          title: 'Latency‑Optimised Infrastructure',
-          message: 'Institutional deployment standards:
-
-• Sub‑millisecond signal processing
-• Redundant cloud across 3 regions
-• 99.97% uptime / automatic failover
-• Direct market data feeds
-• Deterministic Telegram delivery
-• Real‑time risk telemetry'
-        },
-        telegram: {
-          title: 'Native Telegram Distribution',
-          message: 'Seamless operations inside Telegram:
-
-• Zero external dependencies
-• Instant encrypted notifications
-• Interactive trade management
-• Cross‑device sync
-• Professional operator console'
+        // NEW: force-scroll helper to ensure every page opens at the very top
+        function scrollToTop() {
+            // Reset common scroll hosts
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            const container = document.querySelector('.container');
+            if (container) container.scrollTop = 0;
+            const active = document.querySelector('.page.active');
+            if (active) active.scrollTop = 0;
         }
-      };
-      const d = featureDetails[feature];
-      if (!d) return;
-      if (tg?.showPopup) {
-        tg.showPopup({ title: d.title, message: d.message, buttons: [ {id:'trial', type:'default', text:'Start Trial'}, {id:'close', type:'cancel', text:'Close'} ] }, (id) => { if (id==='trial') showTrialPage(); });
-      } else {
-        if (confirm(d.title + '
-
-' + d.message + '
-
-Start your trial?')) showTrialPage();
-      }
-    }
-
-    // Navigation helpers
-    function setActive(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      scrollToTop();
-      if (tg) {
-        if (id === 'mainPage') tg.BackButton.hide(); else { tg.BackButton.show(); tg.BackButton.onClick(() => showMainPage()); }
-      }
-    }
-
-    function showInstrumentPage(instrument) { setActive(instrument + 'Page'); }
-    function showTrialPage() { setActive('trialPage'); }
-    function showMainPage() { setActive('mainPage'); }
-
-    // Trial flow
-    function startTrial() {
-      if (tg?.showPopup) {
-        tg.showPopup({
-          title: 'Activate Premium Trial',
-          message: 'Institutional‑grade signals, 7 days free:
-
-• Real‑time analysis
-• 1–2 premium signals daily
-• Risk guidelines
-• Priority support
-
-No payment required to start.',
-          buttons: [ {id:'activate', type:'default', text:'Activate Now'}, {id:'cancel', type:'cancel', text:'Maybe Later'} ]
-        }, (btn) => {
-          if (btn==='activate') {
-            tg.sendData(JSON.stringify({
-              action:'start_premium_trial',
-              user_id: tg.initDataUnsafe?.user?.id,
-              plan:'premium_7_day_trial',
-              instruments:['XAU/USD','US100','US30','GBP/USD'],
-              timestamp: Date.now()
-            }));
-            tg.showAlert('Premium trial activated. Welcome aboard.');
-            showMainPage();
-          }
-        });
-      } else {
-        alert('Premium trial activated!');
-      }
-    }
-
-    function handleShareApp() {
-      if (tg) {
-        const botUsername = 'solventinformationpage_bot'; // replace with your bot
-        const shareText = 'Institutional signals in Telegram. Arcadia Capital premium trial.';
-        const shareUrl = 'https://t.me/' + botUsername + '?start=premium_referral';
-        tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText));
-      } else {
-        alert('Sharing via Telegram…');
-      }
-    }
-
-    if (tg) { tg.BackButton.onClick(() => showMainPage()); }
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcadia Capital — Institutional Signals</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --bg: #0b1324;            /* deep navy */
-      --panel: #0f1a33;         /* slightly lighter navy */
-      --panel-2: #0c172c;
-      --ink: #e8ebf3;           /* soft white */
-      --muted: #9aa3b2;         /* slate */
-      --line: rgba(255,255,255,.08);
-      --accent: #c9a86a;        /* investment gold */
-      --accent-2: #8aa4ff;      /* cool accent */
-      --success: #62d6a6;
-      --danger: #ff8a8a;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-      --radius-xl: 28px;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --radius-sm: 12px;
-      --maxw: 520px;            /* mobile-first, premium density */
-      --space: 22px;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--ink);
-      background: radial-gradient(1200px 800px at 50% -200px, rgba(201,168,106,.14), transparent 60%),
-                  radial-gradient(900px 600px at 120% 10%, rgba(138,164,255,.12), transparent 50%),
-                  var(--bg);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .container {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      min-height: 100dvh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* Top Brand Bar */
-    .brandbar {
-      position: sticky; top: 0; z-index: 20;
-      backdrop-filter: saturate(120%) blur(10px);
-      background: linear-gradient(to bottom, rgba(11,19,36,.85), rgba(11,19,36,.55));
-      border-bottom: 1px solid var(--line);
-    }
-    .brandbar-inner { display:flex; align-items:center; gap:12px; padding: 14px var(--space); }
-    .logo {
-      width: 38px; height:38px; border-radius: 10px;
-      display:grid; place-items:center;
-      background: linear-gradient(135deg, rgba(201,168,106,.15), rgba(138,164,255,.12));
-      border: 1px solid var(--line);
-      color: var(--accent);
-      font-weight: 800;
-      letter-spacing: .5px;
-    }
-    .brand { line-height:1; }
-    .brand h1 { margin:0; font-size: 15px; font-weight: 800; letter-spacing: .6px; }
-    .brand p { margin:2px 0 0; font-size: 11px; color: var(--muted); letter-spacing: .4px; }
-    .status {
-      margin-left:auto; display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 11px;
-    }
-    .dot { width:7px; height:7px; border-radius:50%; background: var(--success); box-shadow:0 0 0 0 rgba(98,214,166,.6); animation: ping 2.4s infinite; }
-    @keyframes ping { 0%{ box-shadow:0 0 0 0 rgba(98,214,166,.6);} 70%{ box-shadow:0 0 0 10px rgba(98,214,166,0);} 100%{ box-shadow:0 0 0 0 rgba(98,214,166,0);} }
-
-    /* Hero */
-    .hero {
-      padding: 28px var(--space) 18px;
-      border-bottom: 1px solid var(--line);
-      background:
-        radial-gradient(600px 260px at 50% -80px, rgba(201,168,106,.18), transparent 70%),
-        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-    }
-    .headline {
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-      font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -.2px;
-    }
-    .kicker { margin-top:10px; color: var(--muted); font-size: 13px; }
-
-    /* KPI strip */
-    .kpi {
-      display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top:18px;
-    }
-    .kpi .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
-      border: 1px solid var(--line); border-radius: var(--radius-md);
-      padding: 14px; text-align:center; position:relative; overflow:hidden;
-    }
-    .kpi .card:before { content:""; position:absolute; inset:0; background: linear-gradient(90deg, rgba(201,168,106,.12), transparent 30%, transparent 70%, rgba(138,164,255,.12)); opacity:.35; mask: linear-gradient(#000 0 0); }
-    .metric { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-weight:800; font-size: 18px; }
-    .label { color: var(--muted); font-size: 10px; letter-spacing: .4px; text-transform: uppercase; margin-top: 4px; }
-
-    /* Page Shell */
-    .page { display:none; opacity:0; transform: translateY(8px); transition: opacity .28s ease, transform .28s ease; }
-    .page.active { display:block; opacity:1; transform: translateY(0); }
-
-    /* Sections */
-    .section { padding: 22px var(--space); }
-    .section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
-    .section-title h2 { font-size: 14px; letter-spacing: .3px; font-weight: 800; margin:0; }
-    .section-title .sub { color: var(--muted); font-size: 12px; }
-
-    /* Instruments Grid */
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .inst {
-      border: 1px solid var(--line); border-radius: var(--radius-lg); overflow:hidden; cursor:pointer;
-      background: linear-gradient(180deg, rgba(12,23,44,1), rgba(12,23,44,.6));
-      box-shadow: var(--shadow);
-      transition: transform .25s ease, border-color .25s ease;
-      position: relative;
-    }
-    .inst:hover { transform: translateY(-4px); border-color: rgba(201,168,106,.35); }
-    .inst .topbar {
-      height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    }
-    .inst .body { padding: 14px; text-align:center; }
-    .sym { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15px; font-weight: 800; letter-spacing: .4px; }
-    .nm { color: var(--muted); font-size: 10px; letter-spacing: .4px; text-transform: uppercase; margin-top: 4px; }
-    .ret { margin-top: 10px; font-weight: 900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--success); font-size: 16px; }
-
-    /* Feature Cards */
-    .feature-row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .feature {
-      border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px; background: var(--panel);
-      position:relative; overflow:hidden; cursor:pointer; transition: transform .25s ease, border-color .25s ease;
-    }
-    .feature:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.12); }
-    .feature h3 { margin: 4px 0 6px; font-size: 13px; letter-spacing: .2px; }
-    .feature p { margin:0; color: var(--muted); font-size: 12px; line-height: 1.45; }
-    .badge { display:inline-block; padding: 6px 10px; border-radius: 999px; border:1px solid var(--line); background: rgba(255,255,255,.02); font-size: 11px; letter-spacing: .3px; }
-
-    /* Headers inside detail pages */
-    .pagehead { padding: 24px var(--space) 16px; border-bottom:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); }
-    .pagehead h2 { margin:0 0 8px; font-size: 22px; font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif; }
-    .pagehead .sub { color: var(--muted); font-size: 13px; }
-    .highlight { margin-top: 10px; font-weight: 900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--accent); font-size: 18px; }
-
-    .content-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: 18px;
-      margin: 16px var(--space) 0;
-    }
-    .content-card h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .3px; }
-    .content-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
-
-    .returns { display:grid; gap: 12px; margin-top: 10px; }
-    .retcard { border: 1px solid var(--line); background: var(--panel-2); border-radius: var(--radius-md); padding: 14px; }
-    .retcard .sz { font-weight: 700; }
-    .retcard .amt { margin-top:6px; font-weight:900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--success); font-size: 18px; }
-    .retcard .meta { margin-top:4px; color: var(--muted); font-size: 12px; }
-
-    /* CTA Footer */
-    .cta {
-      border-top:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-      padding: 18px var(--space) 24px; position: sticky; bottom: 0; z-index: 10;
-    }
-    .cta .title { font-size: 14px; font-weight: 800; letter-spacing: .3px; }
-    .cta .sub { color: var(--muted); font-size: 12px; margin-top:4px; }
-    .cta-actions { margin-top: 14px; display:grid; gap: 10px; }
-    .btn {
-      appearance: none; border: 1px solid var(--line); border-radius: 999px; padding: 16px 20px; font-weight: 800; letter-spacing: .2px; cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), #b09055); color: #0a0f1a; box-shadow: 0 10px 30px rgba(201,168,106,.25);
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(201,168,106,.35); }
-    .btn.secondary { background: transparent; color: var(--ink); border-color: rgba(255,255,255,.14); box-shadow: none; }
-    .btn.secondary:hover { border-color: rgba(255,255,255,.24); }
-
-    /* Back button */
-    .back { margin: 14px var(--space) 0; }
-    .back button { background: transparent; border:1px solid var(--line); color: var(--ink); padding:10px 14px; border-radius: 999px; font-weight:700; letter-spacing:.2px; cursor:pointer; }
-    .back button:hover { border-color: rgba(255,255,255,.22); }
-
-    /* Accessibility: motion */
-    @media (prefers-reduced-motion: reduce) {
-      .page { transition: none; }
-      .inst, .feature { transition: none; }
-      .btn { transition: none; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-
-    <!-- NAV / BRAND BAR -->
-    <div class="brandbar">
-      <div class="brandbar-inner">
-        <div class="logo">AC</div>
-        <div class="brand">
-          <h1>Arcadia Capital</h1>
-          <p>Private Markets Intelligence</p>
-        </div>
-        <div class="status"><span class="dot"></span> LIVE</div>
-      </div>
-    </div>
-
-    <!-- MAIN PAGE -->
-    <div id="mainPage" class="page active">
-      <div class="hero">
-        <div class="headline">Institutional signals, distilled for decisive execution.</div>
-        <div class="kicker">Designed with the aesthetic and discipline of a multi‑billion dollar private equity firm. Delivered natively in Telegram.</div>
-        <div class="kpi">
-          <div class="card"><div class="metric">500B+</div><div class="label">Data Points</div></div>
-          <div class="card"><div class="metric">92%</div><div class="label">Model Hit‑Rate*</div></div>
-          <div class="card"><div class="metric">24/7</div><div class="label">Desk Coverage</div></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <h2>Mandates</h2>
-          <span class="sub">Click to open strategy dossiers</span>
-        </div>
-        <div class="grid">
-          <div class="inst" onclick="showInstrumentPage('xauusd')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">XAU/USD</div>
-              <div class="nm">Gold Spot</div>
-              <div class="ret">+24.7% Q4</div>
-            </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('us100')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">US100</div>
-              <div class="nm">Nasdaq 100</div>
-              <div class="ret">+31.2% Q4</div>
-            </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('us30')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">US30</div>
-              <div class="nm">Dow Jones</div>
-              <div class="ret">+28.5% Q4</div>
-            </div>
-          </div>
-          <div class="inst" onclick="showInstrumentPage('gbpusd')">
-            <div class="topbar"></div>
-            <div class="body">
-              <div class="sym">GBP/USD</div>
-              <div class="nm">Cable</div>
-              <div class="ret">+19.3% Q4</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <h2>Capabilities</h2>
-          <span class="sub">Built for institutional governance</span>
-        </div>
-        <div class="feature-row">
-          <div class="feature" onclick="showFeatureDetails('speed')">
-            <span class="badge">Execution</span>
-            <h3>Latency‑Optimised Infrastructure</h3>
-            <p>Sub‑millisecond pipelines, redundant regions, continuous monitoring, and deterministic delivery.</p>
-          </div>
-          <div class="feature" onclick="showFeatureDetails('telegram')">
-            <span class="badge">Distribution</span>
-            <h3>Native Telegram Delivery</h3>
-            <p>Encrypted, cross‑device, and immediate. No external dependencies.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="cta">
-        <div class="title">Start your premium trial</div>
-        <div class="sub">Institutional‑grade research and real‑time signals. Cancel anytime.</div>
-        <div class="cta-actions">
-          <button class="btn" onclick="showTrialPage()">Activate Free Trial</button>
-          <button class="btn secondary" onclick="handleShareApp()">Share Platform</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TRIAL PAGE -->
-    <div id="trialPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Overview</button></div>
-      <div class="pagehead">
-        <h2>Premium Access</h2>
-        <div class="sub">Choose your trading advantage</div>
-      </div>
-      <div class="content-card">
-        <h3>► 7‑Day Premium Trial</h3>
-        <p>1–2 premium signals daily • Real‑time market analysis • Institutional‑grade research • Priority Telegram support • Risk framework guidance • Cancel anytime</p>
-      </div>
-      <div class="cta">
-        <button class="btn" onclick="startTrial()">Activate Premium Trial</button>
-      </div>
-    </div>
-
-    <!-- XAU/USD PAGE -->
-    <div id="xauusdPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>XAU/USD — Gold</h2>
-        <div class="sub">Spot metal • London/NY overlap focus</div>
-        <div class="highlight">+24.7% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Algorithmic blend of Fed regime shifts, inflation term‑structure, and geopolitical stress signals. Session‑aware entries with dynamic sizing from realised volatility and DXY correlation.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$247</div><div class="meta">24.7% • 47 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$2,470</div><div class="meta">24.7% • Compounding</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$24,700</div><div class="meta">24.7% • Institutional sizing</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- US100 PAGE -->
-    <div id="us100Page" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>US100 — Nasdaq 100</h2>
-        <div class="sub">Tech momentum • Earnings‑cycle sensitive</div>
-        <div class="highlight">+31.2% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Momentum capture across sector rotations, earnings volatility, and policy beta. Pre‑market gap structures and breakout detection guide execution windows.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$312</div><div class="meta">31.2% • 52 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$3,120</div><div class="meta">31.2% • Advanced risk</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$31,200</div><div class="meta">31.2% • Portfolio‑level</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- US30 PAGE -->
-    <div id="us30Page" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>US30 — Dow Jones</h2>
-        <div class="sub">Blue‑chip factor • Dividend/flow aware</div>
-        <div class="highlight">+28.5% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Institutional flow and dividend‑season dynamics with long‑horizon support/resistance regimes. Execution biased to pre‑ and post‑open liquidity pockets.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$285</div><div class="meta">28.5% • 49 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$2,850</div><div class="meta">28.5% • Diversified</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$28,500</div><div class="meta">28.5% • Institutional</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-    <!-- GBP/USD PAGE -->
-    <div id="gbpusdPage" class="page">
-      <div class="back"><button onclick="showMainPage()">← Mandates</button></div>
-      <div class="pagehead">
-        <h2>GBP/USD — Cable</h2>
-        <div class="sub">BoE/Fed divergence • London/NY overlap</div>
-        <div class="highlight">+19.3% Q4 Returns</div>
-      </div>
-      <div class="content-card">
-        <h3>▸ Playbook</h3>
-        <p>Policy divergence, UK macro surprises, and USD strength composites. Psychological levels and London session structure inform entry discipline.</p>
-      </div>
-      <div class="content-card">
-        <h3>▸ Performance Illustrations</h3>
-        <div class="returns">
-          <div class="retcard"><div class="sz">$1,000 Starting Capital</div><div class="amt">+$193</div><div class="meta">19.3% • 41 signals</div></div>
-          <div class="retcard"><div class="sz">$10,000 Starting Capital</div><div class="amt">+$1,930</div><div class="meta">19.3% • Currency expertise</div></div>
-          <div class="retcard"><div class="sz">$100,000 Starting Capital</div><div class="amt">+$19,300</div><div class="meta">19.3% • FX specialization</div></div>
-        </div>
-      </div>
-      <div class="cta"><button class="btn" onclick="showTrialPage()">Start Free Trial</button></div>
-    </div>
-
-  </div>
-
-  <script>
-    // Telegram bootstrap
-    let tg = window.Telegram?.WebApp;
-
-    // Ensure every page opens at the top
-    function scrollToTop() {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const container = document.querySelector('.container');
-      if (container) container.scrollTop = 0;
-      const active = document.querySelector('.page.active');
-      if (active) active.scrollTop = 0;
-    }
-
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      // Theme nudge (optional): if Telegram provides bg, respect it slightly
-      if (tg.themeParams?.bg_color) {
-        document.body.style.backgroundColor = tg.themeParams.bg_color;
-      }
-      tg.MainButton.text = 'Start Premium Trial';
-      tg.MainButton.show();
-      tg.MainButton.onClick(() => showTrialPage());
-    }
-
-    // Feature detail popups
-    function showFeatureDetails(feature) {
-      const featureDetails = {
-        speed: {
-          title: 'Latency‑Optimised Infrastructure',
-          message: 'Institutional deployment standards:
-
-• Sub‑millisecond signal processing
-• Redundant cloud across 3 regions
-• 99.97% uptime / automatic failover
-• Direct market data feeds
-• Deterministic Telegram delivery
-• Real‑time risk telemetry'
-        },
-        telegram: {
-          title: 'Native Telegram Distribution',
-          message: 'Seamless operations inside Telegram:
-
-• Zero external dependencies
-• Instant encrypted notifications
-• Interactive trade management
-• Cross‑device sync
-• Professional operator console'
+        
+        if (tg) {
+            tg.ready();
+            // tg.expand(); // ← removed to keep the Mini App in half-height (collapsed) mode on open
+            
+            // Enhanced user info display
+            if (tg.initDataUnsafe?.user) {
+                const user = tg.initDataUnsafe.user;
+                const userInfo = document.getElementById('userInfo');
+                const userName = document.getElementById('userName');
+                const userAvatar = document.getElementById('userAvatar');
+                
+                userName.textContent = user.first_name || 'Trader';
+                userAvatar.textContent = (user.first_name || 'T')[0].toUpperCase();
+                userInfo.classList.add('show');
+            }
+            
+            // Set theme colors
+            document.body.style.background = tg.themeParams.bg_color || '#0A0A12';
+            
+            // Configure main button
+            tg.MainButton.text = "Start Premium Trial";
+            tg.MainButton.show();
+            tg.MainButton.onClick(() => showTrialPage());
         }
-      };
-      const d = featureDetails[feature];
-      if (!d) return;
-      if (tg?.showPopup) {
-        tg.showPopup({ title: d.title, message: d.message, buttons: [ {id:'trial', type:'default', text:'Start Trial'}, {id:'close', type:'cancel', text:'Close'} ] }, (id) => { if (id==='trial') showTrialPage(); });
-      } else {
-        if (confirm(d.title + '
-
-' + d.message + '
-
-Start your trial?')) showTrialPage();
-      }
-    }
-
-    // Navigation helpers
-    function setActive(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      scrollToTop();
-      if (tg) {
-        if (id === 'mainPage') tg.BackButton.hide(); else { tg.BackButton.show(); tg.BackButton.onClick(() => showMainPage()); }
-      }
-    }
-
-    function showInstrumentPage(instrument) { setActive(instrument + 'Page'); }
-    function showTrialPage() { setActive('trialPage'); }
-    function showMainPage() { setActive('mainPage'); }
-
-    // Trial flow
-    function startTrial() {
-      if (tg?.showPopup) {
-        tg.showPopup({
-          title: 'Activate Premium Trial',
-          message: 'Institutional‑grade signals, 7 days free:
-
-• Real‑time analysis
-• 1–2 premium signals daily
-• Risk guidelines
-• Priority support
-
-No payment required to start.',
-          buttons: [ {id:'activate', type:'default', text:'Activate Now'}, {id:'cancel', type:'cancel', text:'Maybe Later'} ]
-        }, (btn) => {
-          if (btn==='activate') {
-            tg.sendData(JSON.stringify({
-              action:'start_premium_trial',
-              user_id: tg.initDataUnsafe?.user?.id,
-              plan:'premium_7_day_trial',
-              instruments:['XAU/USD','US100','US30','GBP/USD'],
-              timestamp: Date.now()
-            }));
-            tg.showAlert('Premium trial activated. Welcome aboard.');
-            showMainPage();
-          }
-        });
-      } else {
-        alert('Premium trial activated!');
-      }
-    }
-
-    function handleShareApp() {
-      if (tg) {
-        const botUsername = 'solventinformationpage_bot'; // replace with your bot
-        const shareText = 'Institutional signals in Telegram. Arcadia Capital premium trial.';
-        const shareUrl = 'https://t.me/' + botUsername + '?start=premium_referral';
-        tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText));
-      } else {
-        alert('Sharing via Telegram…');
-      }
-    }
-
-    if (tg) { tg.BackButton.onClick(() => showMainPage()); }
-  </script>
+        
+        // Enhanced feature details with trading focus
+        function showFeatureDetails(feature) {
+            const featureDetails = {
+                speed: {
+                    title: 'Lightning Execution Infrastructure',
+                    message: 'Institutional-grade trading infrastructure:\n\n• Sub-millisecond signal processing\n• Redundant cloud architecture across 3 continents\n• 99.97% uptime with automatic failover\n• Direct market data feeds from NYSE/NASDAQ\n• Latency-optimized Telegram delivery\n• Real-time risk monitoring systems'
+                },
+                telegram: {
+                    title: 'Native Telegram Integration',
+                    message: 'Seamless trading experience within Telegram:\n\n• Zero external app dependencies\n• Instant signal notifications\n• Interactive trade management\n• Secure encrypted communications\n• Cross-device synchronization\n• Professional trading interface'
+                }
+            };
+            
+            const details = featureDetails[feature];
+            if (!details) return;
+            
+            if (tg && typeof tg.showPopup === 'function') {
+                tg.showPopup({
+                    title: details.title,
+                    message: details.message,
+                    buttons: [
+                        {id: 'trial', type: 'default', text: 'Start Trial'},
+                        {id: 'close', type: 'cancel', text: 'Close'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'trial') {
+                        showTrialPage();
+                    }
+                });
+            } else {
+                // Fallback for non-Telegram environment or if popup fails
+                const userConfirm = confirm(details.title + '\n\n' + details.message + '\n\nWould you like to start your trial?');
+                if (userConfirm) {
+                    showTrialPage();
+                }
+            }
+        }
+        
+        function showInstrumentPage(instrument) {
+            document.getElementById('mainPage').classList.remove('active');
+            document.getElementById(instrument + 'Page').classList.add('active');
+            
+            if (tg) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => showMainPage());
+            }
+            // NEW: ensure we land at the top when opening an instrument page
+            scrollToTop();
+        }
+        
+        function showTrialPage() {
+            document.getElementById('mainPage').classList.remove('active');
+            document.getElementById('trialPage').classList.add('active');
+            
+            if (tg) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => showMainPage());
+            }
+            // NEW: ensure we land at the top when opening the trial page
+            scrollToTop();
+        }
+        
+        function showMainPage() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            document.getElementById('mainPage').classList.add('active');
+            
+            if (tg) {
+                tg.BackButton.hide();
+            }
+            // NEW: ensure we land at the top when returning to main
+            scrollToTop();
+        }
+        
+        function startTrial() {
+            if (tg) {
+                tg.showPopup({
+                    title: 'Activate Premium Trial',
+                    message: 'Ready to access institutional-grade trading signals?\n\nYour 7-day premium trial includes:\n• Real-time market analysis\n• 1-2 daily premium signals\n• Risk management guidance\n• Priority support access\n\nNo payment required to start.',
+                    buttons: [
+                        {id: 'activate', type: 'default', text: 'Activate Now'},
+                        {id: 'cancel', type: 'cancel', text: 'Maybe Later'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'activate') {
+                        tg.sendData(JSON.stringify({
+                            action: 'start_premium_trial',
+                            user_id: tg.initDataUnsafe?.user?.id,
+                            plan: 'premium_7_day_trial',
+                            instruments: ['XAU/USD', 'US100', 'US30', 'GBP/USD'],
+                            timestamp: Date.now()
+                        }));
+                        tg.showAlert('Premium trial activated! Your first institutional-grade signal will arrive within 24 hours. Welcome to professional trading.');
+                        showMainPage();
+                    }
+                });
+            } else {
+                alert('Premium trial activated! In Telegram, this would send your registration to our trading system.');
+            }
+        }
+        
+        function handleShareApp() {
+            if (tg) {
+                const botUsername = 'solventinformationpage_bot'; // Replace with your actual bot username
+                const shareText = 'Join me on this professional trading platform! Institutional-grade signals with 92% accuracy.';
+                const shareUrl = 'https://t.me/' + botUsername + '?start=premium_referral';
+                
+                tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText));
+            } else {
+                alert('Share feature activated! This would let users share your premium trading platform.');
+            }
+        }
+        
+        // Handle back button
+        if (tg) {
+            tg.BackButton.onClick(() => {
+                showMainPage();
+            });
+        }
+    </script>
 </body>
 </html>
